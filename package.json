@@ -25,6 +25,8 @@
     ]
   },
   "dependencies": {
+    "@telegraf/session": "^2.0.0-beta.7",
+    "mongodb": "^6.8.0",
     "telegraf": "github:telegraf/telegraf",
     "telegram": "^2.23.10",
     "typescript": "^5.5.4"
