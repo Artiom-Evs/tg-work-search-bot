@@ -1,119 +1,37 @@
-import { Telegraf, Context, Markup, session } from "telegraf";
-import { Mongo } from "@telegraf/session/mongodb";
-import { Api, TelegramClient } from 'telegram';
-import { StringSession } from 'telegram/sessions';
+import { Composer, Scenes, Telegraf } from "telegraf";
+import { CustomContext } from "./customContext";
+import authScene from "./scenes/authScene";
+import authMiddleware from "./middlewares/authMiddleware";
+import sessionMiddleware from "./middlewares/sessionMiddleware";
 
-interface AuthSessionData {
-    auth: {
-        isAuthorized: boolean,
-        session?: string,
-        phoneNumber?: string,
-        phoneCodeHash?: string,
-        secretCode?: string
-    }
-}
-
-interface CustomContext extends Context {
-    session: AuthSessionData
-}
 const botToken = process.env.BOT_TOKEN;
-const apiId = parseInt(process.env.API_ID ?? "");
-const apiHash = process.env.API_HASH;
-const mongodbUrl = process.env.MONGODB_URL;
 
-if (!botToken || !apiId || !apiHash || !mongodbUrl)
-    throw new Error(`"BOT_TOKEN", "API_ID", "API_HASH" andd "MONGODB_URL" environment variables should be defined.`);
+if (!botToken)
+    throw new Error(`"BOT_TOKEN" environment variables should be defined.`);
 
-const store = Mongo<CustomContext>({
-    url: mongodbUrl,
-    database: "tg_work_search_bot"
+const stage = new Scenes.Stage<CustomContext>([ authScene ], {
+    defaultSession: ({ })
 });
-const sessionStore = session({
-    getSessionKey: (ctx: Context) => `${ctx.from?.id}`,
-    store
-});
+
+const publicCommands = new Composer<CustomContext>();
+publicCommands.command("start", async (ctx) => await ctx.scene.enter("authorization"));
+publicCommands.command("help", async (ctx) => await ctx.reply("I'm sorry! I can't help you yet :("));
+
+const privateCommands = new Composer<CustomContext>();
+privateCommands.command("exit", authMiddleware, async (ctx) => await ctx.reply("Functionality to exit does not implemented yet."));
+privateCommands.command("me", authMiddleware, async (ctx) => await ctx.reply(JSON.stringify(ctx.session, null, 4)));
 
 const bot = new Telegraf<CustomContext>(botToken );
 
-bot.use(sessionStore);
+bot.use(sessionMiddleware);
+bot.use(stage.middleware());
 
-bot.start(async (ctx) => {
-    ctx.session ??= { auth: { isAuthorized: false } };
+bot.use(publicCommands);
+bot.use(privateCommands);
 
-    if (ctx.session.auth.isAuthorized)
-        await ctx.reply("You are already authorized.");
-    else 
-    await ctx.reply("Welcome! Please send me your phone number:");
-});
+publicCommands.start((ctx) => ctx.scene.enter("authorization"));
 
-bot.on("text", async (ctx) => {
-    const chatId = ctx.chat.id;
-    const text = ctx.message.text;
-
-    if (ctx.session.auth.isAuthorized) {
-        await ctx.reply("You are already authorized.");
-        return;
-    }
-
-    const auth = ctx.session.auth;
-
-    if (!auth.phoneNumber) {
-        auth.phoneNumber = text;
-
-        const session = new StringSession("");
-        const client = new TelegramClient(session, apiId, apiHash, { connectionRetries: 5 });
-        await client.connect();
-        
-        try {
-            const result = await client.sendCode({ apiId, apiHash }, auth.phoneNumber);
-            
-            auth.phoneCodeHash = result.phoneCodeHash;
-            auth.session = session.save();
-            await ctx.reply(`Please enter the code you received from Telegram separated by whitespace (for example, "1 2 3 4 5"):`);
-        } 
-        catch (e: any) {
-            console.error("Error while sending authorization code.", e);
-            await ctx.reply(`Failed to send authorization code. Please try again. Error: ${e?.message ?? e}.`);
-        }
-        finally {
-            client.disconnect();
-        }
-    } 
-    else if (!auth.secretCode) {
-        auth.secretCode = text.replace(" ", "");
-        await ctx.reply(`Please enter your password (if you don't use it, enter "-"):`);
-    } 
-    else {
-        const session = new StringSession(auth.session);
-        const client = new TelegramClient(session, apiId, apiHash, { connectionRetries: 5 });
-        await client.connect();
-
-        try {
-            await client.signInUser({ apiId, apiHash }, {
-                phoneNumber: auth.phoneNumber,
-                phoneCode: async () => auth.secretCode ?? "",
-                password: text != "-" ? async () => text : undefined,
-                onError: (err) => { throw err }
-            });
-
-            ctx.session.auth = { 
-                isAuthorized: true, 
-                session: session.save()
-            };
-
-            const me = await client.getMe();
-            await ctx.reply(`You are logged in as ${me.firstName} ${me.lastName} (@${me.username})`);
-        } 
-        catch (e) {
-            console.error("Error while sign-in Telegram.", e);
-            await ctx.reply('Failed to sign in. Please check your credentials and try again.');
-        }
-        finally {
-            client.disconnect();
-        }
-    }
-});
-
+process.once('SIGINT', () => bot.stop('SIGINT'))
+process.once('SIGTERM', () => bot.stop('SIGTERM'))
 bot.launch();
-
 console.log("Bot is running...");
