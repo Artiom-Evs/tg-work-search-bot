@@ -14,7 +14,7 @@ const mongodbUrl = process.env.MONGODB_URL;
 if (!mongodbUrl)
     throw new Error(`"MONGODB_URL" environment variables should be defined.`);
 
-const store = Mongo<CustomSession>({
+export const store = Mongo<CustomSession>({
     url: mongodbUrl ?? "",
     database: "tg_work_search_bot"
 });

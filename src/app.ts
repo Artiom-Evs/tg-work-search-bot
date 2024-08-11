@@ -2,8 +2,9 @@ import { Composer, Scenes, Telegraf } from "telegraf";
 import { CustomContext } from "./customContext";
 import authScene from "./scenes/authScene";
 import authMiddleware from "./middlewares/authMiddleware";
-import sessionMiddleware from "./middlewares/sessionMiddleware";
+import sessionMiddleware, { store } from "./middlewares/sessionMiddleware";
 import { safeAction } from "./tools/telegram";
+import { Api } from "telegram";
 
 const botToken = process.env.BOT_TOKEN;
 
@@ -19,7 +20,11 @@ publicCommands.start((ctx) => ctx.scene.enter("authorization"));
 publicCommands.help(async (ctx) => await ctx.reply("I'm sorry! I can't help you yet :("));
 
 const privateCommands = new Composer<CustomContext>();
-privateCommands.command("exit", authMiddleware, async (ctx) => await ctx.reply("Functionality to exit does not implemented yet."));
+privateCommands.command("exit", authMiddleware, async (ctx) => {
+    await safeAction(ctx.session.auth.session, async (client) => await client.invoke(new Api.auth.LogOut()));
+    await store.delete(`${ctx.from.id}`);
+    await ctx.reply("You have been successfully logged out.");
+});
 privateCommands.command("me", authMiddleware, async (ctx) => {
     const me = await safeAction(ctx.session.auth.session, async (client) => await client.getMe());
     if (me)
