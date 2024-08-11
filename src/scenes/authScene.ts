@@ -1,13 +1,6 @@
 import { Scenes } from "telegraf";
-import { TelegramClient } from "telegram";
-import { StringSession } from "telegram/sessions";
 import { CustomContext } from "../customContext";
-
-const apiId = parseInt(process.env.API_ID ?? "");
-const apiHash = process.env.API_HASH ?? "";
-
-if (!apiId || !apiHash)
-    throw new Error(`"API_ID" and "API_HASH" environment variables should be defined.`);
+import { getClient } from "../tools/telegram";
 
 const authScene = new Scenes.WizardScene<CustomContext>(
     "authorization",
@@ -34,16 +27,14 @@ async function step2Handler(ctx: CustomContext) {
     // TODO: implement phone number validation
     const phoneNumber = ctx.text ?? "";
 
-    const session = new StringSession("");
-    const client = new TelegramClient(session, apiId, apiHash, { connectionRetries: 5 });
-    await client.connect();
-
+    const client = await getClient("");
+    
     try {
-        await client.sendCode({ apiId, apiHash }, phoneNumber );
+        await client.sendCode({ apiId: client.apiId, apiHash: client.apiHash }, phoneNumber );
         await ctx.reply(`Please enter the code you received from Telegram separated by whitespace (for example, "1 2 3 4 5"):`);
 
         ctx.scene.session.phoneNumber = phoneNumber;
-        ctx.session.auth.session = session.save();
+        ctx.session.auth.session = client.session.save() as any as string;
         return ctx.wizard.next();
     }
     catch (e: any) {
@@ -63,12 +54,10 @@ async function step3Handler(ctx: CustomContext) {
 }
 
 async function step4Handler(ctx: CustomContext) {
-    const session = new StringSession(ctx.session.auth.session);
-    const client = new TelegramClient(session, apiId, apiHash, { connectionRetries: 5 });
-    await client.connect();
-
+    const client = await getClient(ctx.session.auth.session);
+    
     try {
-        await client.signInUser({ apiId, apiHash }, {
+        await client.signInUser({ apiId: client.apiId, apiHash: client.apiHash }, {
             phoneNumber: ctx.scene.session.phoneNumber ?? "",
             phoneCode: async () => ctx.scene.session.secretCode ?? "",
             password: async () => (ctx.text && ctx.text != "-" ? ctx.text : ""),
@@ -77,7 +66,7 @@ async function step4Handler(ctx: CustomContext) {
 
         ctx.session.auth = {
             isAuthorized: true,
-            session: session.save()
+            session: client.session.save() as any as string
         };
     }
     catch (e) {
