@@ -4,6 +4,7 @@ import sessionMiddleware from "./middlewares/sessionMiddleware";
 import authScene from "./scenes/authScene";
 import publicCommands from "./commands/publicCommands";
 import privateCommands from "./commands/privateCommands";
+import setChatsScene from "./scenes/setChatsScene";
 
 const botToken = process.env.BOT_TOKEN;
 
@@ -11,7 +12,7 @@ if (!botToken)
     throw new Error(`"BOT_TOKEN" environment variables should be defined.`);
 
 const bot = new Telegraf<CustomContext>(botToken );
-const stage = new Scenes.Stage<CustomContext>([ authScene ], { defaultSession: ({ }) });
+const stage = new Scenes.Stage<CustomContext>([ authScene, setChatsScene ], { defaultSession: ({ }) });
 
 bot.use(sessionMiddleware);
 bot.use(stage.middleware());
