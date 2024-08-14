@@ -1,6 +1,7 @@
 import { Markup, Telegraf } from "telegraf";
 import { getTelegrafBot } from "../../tools/telegram";
 import { Api } from "telegram";
+import { TargetUpdateInfo } from "./types";
 
 class UpserUpdateNotifier {
     private _bot = getTelegrafBot();
@@ -9,14 +10,11 @@ class UpserUpdateNotifier {
         this.notifyUser = this.notifyUser.bind(this);
     }
 
-    public async notifyUser(userId: number, message: Api.Message): Promise<void> {
-        const messageId = message.id;
-        const chatId = Number(message.chat?.id ?? 0);
-        const link = this.getLink(chatId, messageId);
+    public async notifyUser(update: TargetUpdateInfo): Promise<void> {
         const keyboard = this.getKeyboard();
-        const notificationText = this.getNotificationText(link);
+        const notificationText = this.getNotificationText(update);
 
-        await this._bot.telegram.sendMessage(userId, notificationText, {
+        await this._bot.telegram.sendMessage(update.userId, notificationText, {
             reply_markup: keyboard.reply_markup,
             parse_mode: "MarkdownV2"
         });
@@ -28,12 +26,21 @@ class UpserUpdateNotifier {
         ]);
     }
 
-    private getLink(chatId: number, messageId: number): string {
-        return `https://t.me/c/${chatId}/${messageId}`;
+    private getLink(chatId: number, messageId?: number): string {
+        return `https://t.me/c/${chatId}/${messageId ?? ""}`;
     }
 
-    private getNotificationText(link: string): string {
-        return `[Message](${link}) found with the keyword "wordpress"\\.`;
+    private getNotificationText(update: TargetUpdateInfo): string {
+        const messageId = update.message.id;
+        const chatId = Number(update.message.chat?.id ?? 0);
+        const messageLink = this.getLink(chatId, messageId);
+        const chatTitle = this.escapText(update.chat.title);
+        
+        return `[Message](${messageLink}) found in the "${chatTitle}" chat\\.`;
+    }
+
+    private escapText(text: string): string {
+        return text.replace(/_/g, "\\_").replace(/-/g, "\\-");
     }
 }
 

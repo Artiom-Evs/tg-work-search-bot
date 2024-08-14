@@ -5,12 +5,13 @@ import { getClient, getTelegrafBot } from "../../tools/telegram";
 import { Markup, Telegraf } from "telegraf";
 import { Collection } from "mongodb";
 import EventEmitter = require("events");
+import { TargetUpdateInfo } from "./types";
 
 export class UserUpdatesHandler {
     private _userId: number;
 
     public onError: (err: Error) => void = (err) => { throw err; };
-    public onUpdate?: (userId: number, message: Api.Message) => Promise<void>;
+    public onUpdate?: (update: TargetUpdateInfo) => Promise<void>;
 
     constructor(userId: number) {
         this._userId = userId;
@@ -41,19 +42,20 @@ export class UserUpdatesHandler {
         }
     }
 
-    private async handleChatUpdates(userData: CustomSession, chat: ChatItem, client: TelegramClient, bot: Telegraf): Promise<void> {
-        const updates = await client.getMessages(chat.id, {
+    private async handleChatUpdates(userData: CustomSession, chatItem: ChatItem, client: TelegramClient, bot: Telegraf): Promise<void> {
+        const chat = await client.getEntity(chatItem.id) as Api.Channel;
+        const updates = await client.getMessages(chatItem.id, {
             search: "wordpress",
             limit: 100,
-            minId: chat.lastMessageId ?? 0
+            minId: chatItem.lastMessageId ?? 0
         });
 
         if (updates.length === 0) return;
 
         for (const message of updates) {
-            await this.onUpdate?.(this._userId, message);
+            await this.onUpdate?.({ userId: this._userId, chat, message });
         }
 
-        chat.lastMessageId = Math.max(...updates.map(u => u.id));
+        chatItem.lastMessageId = Math.max(...updates.map(u => u.id));
     }
 }
