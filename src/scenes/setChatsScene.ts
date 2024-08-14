@@ -53,7 +53,7 @@ async function getChatItems(userSession: string): Promise<SelectionChatItem[]> {
     const chats = await safeAction(userSession, async (client) => await client.getDialogs()) ??[];
     
     return chats
-    .filter(chat => chat.isChannel || chat.isGroup)
+    .filter(chat => !chat.archived && (chat.isChannel || chat.isGroup))
     .map(chat => ({
         id: Number(chat.id),
         title: chat.title ?? "",
