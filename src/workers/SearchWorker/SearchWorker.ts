@@ -1,7 +1,8 @@
 import { parentPort } from "worker_threads";
 import docStorage from "../../services/docStorage";
 import { CustomSession } from "../../customContext";
-import { handleUserUpdates } from "./UserUpdatesHandler";
+import { UserUpdatesHandler } from "./UserUpdatesHandler";
+import updateNotifier from "./UserUpdateNotifier";
 
 const period = parseInt(process.env.RESEARCH_PERIOD_MS ?? "") ?? 60000;
 
@@ -54,10 +55,12 @@ async function handleUpdates(): Promise<void> {
             if (stopInvoked) return;
 
             const userId = parseInt(user.key);
-            if (userId)
-                await handleUserUpdates(userId);
+            if (!userId) break;
+            
+            const handler = new UserUpdatesHandler(userId);
+            handler.onUpdate = updateNotifier.notifyUser;
+            await handler.handleUpdates();
         }
-
     }
     catch (e) {
         console.error("Error while handling updates.", e);

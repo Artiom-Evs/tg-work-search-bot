@@ -4,60 +4,56 @@ import { store } from "../../middlewares/sessionMiddleware";
 import { getClient, getTelegrafBot } from "../../tools/telegram";
 import { Markup, Telegraf } from "telegraf";
 import { Collection } from "mongodb";
+import EventEmitter = require("events");
 
-export async function handleUserUpdates(userId: number): Promise<void> {
-    const userData = await store.get(`${userId}`);
+export class UserUpdatesHandler {
+    private _userId: number;
 
-    if (!userData)
-        throw new Error(`User with id "${userId}" not found.`);;
+    public onError: (err: Error) => void = (err) => { throw err; };
+    public onUpdate?: (userId: number, message: Api.Message) => Promise<void>;
 
-    const client = await getClient(userData.auth.session);
-    const bot = getTelegrafBot();
-    
-    try {
-        for (const chat of userData?.chats ?? []) {
-            await handleUserChatUpdates(userId, userData, chat, client, bot);
+    constructor(userId: number) {
+        this._userId = userId;
+    }
+
+    public async handleUpdates(): Promise<void> {
+        const userData = await store.get(`${this._userId}`);
+
+        if (!userData) {
+            this.onError(new Error(`User with id "${this._userId}" not found.`));
+            return;
+        }
+        
+        const client = await getClient(userData.auth.session);
+        const bot = getTelegrafBot();
+        
+        try {
+            for (const chat of userData?.chats ?? []) {
+                await this.handleChatUpdates(userData, chat, client, bot);
+            }
+        }
+        catch (e) {
+            console.error("Error while handling user updates. User ID:", this._userId, ".", e);
+        }
+        finally {
+            await client.disconnect();
+            await store.set(`${this._userId}`, userData);
         }
     }
-    catch (e) {
-        console.error("Error while handling user updates. User ID:", userId, ".", e);
+
+    private async handleChatUpdates(userData: CustomSession, chat: ChatItem, client: TelegramClient, bot: Telegraf): Promise<void> {
+        const updates = await client.getMessages(chat.id, {
+            search: "wordpress",
+            limit: 100,
+            minId: chat.lastMessageId ?? 0
+        });
+
+        if (updates.length === 0) return;
+
+        for (const message of updates) {
+            await this.onUpdate?.(this._userId, message);
+        }
+
+        chat.lastMessageId = Math.max(...updates.map(u => u.id));
     }
-    finally {
-        await client.disconnect();
-        await store.set(`${userId}`, userData);
-    }
-}
-
-async function handleUserChatUpdates(userId: number, userData: CustomSession, chat: ChatItem, client: TelegramClient, bot: Telegraf): Promise<void> {
-    const updates = await client.getMessages(chat.id, {
-        search: "wordpress",
-        limit: 100,
-        minId: chat.lastMessageId ?? 0
-    });
-
-    if (updates.length === 0) return;
-
-    for (const message of updates) {
-        await sendSearchNotification(userId, message, bot);
-    }
-
-    chat.lastMessageId = Math.max(...updates.map(u => u.id));
-}
-
-async function sendSearchNotification(userId: number, message: Api.Message, bot: Telegraf): Promise<void> {
-    const keyboard = Markup.inlineKeyboard([
-        Markup.button.callback("Delete", "delete_notification"),
-    ]);
-
-    const messageId = message.id;
-    const messageChatId = message.chat?.id;
-    
-    const messageText = `https://t.me/c/${messageChatId}/${messageId}`
-        + `\nI found a new message with the word "wordpress".`;
-
-    await bot.telegram.sendMessage(userId, messageText, {
-        reply_markup: keyboard.reply_markup
-    });
-
-    //console.debug("MESSAGE:", (userMessage as any)[0][0]);
 }
