@@ -27,4 +27,8 @@ Phone: ${me.phone ?? "-"}
 
 privateCommands.command("chats", authMiddleware, async (ctx) => await ctx.scene.enter("set-chats"));
 
+privateCommands.action("delete_notification", async (ctx) => {
+    await ctx.deleteMessage();
+});
+
 export default privateCommands;

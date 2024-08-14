@@ -1,11 +1,13 @@
+import { Context, Telegraf } from "telegraf";
 import { TelegramClient } from "telegram";
 import { StringSession } from "telegram/sessions";
 
+const botToken = process.env.BOT_TOKEN;
 const apiId = parseInt(process.env.API_ID ?? "");
 const apiHash = process.env.API_HASH ?? "";
 
-if (!apiId || !apiHash)
-    throw new Error(`"API_ID" and "API_HASH" environment variables should be defined.`);
+if (!botToken || !apiId || !apiHash)
+    throw new Error(`"BOT_TOKEN", "API_ID" and "API_HASH" environment variables should be defined.`);
 
 export async function getClient(session: string): Promise<TelegramClient> {
     const client = new TelegramClient(new StringSession(session), apiId, apiHash, { connectionRetries: 5 });
@@ -24,4 +26,8 @@ export async function safeAction<T = any>(session: string, action: (client: Tele
     finally {
         await client.disconnect();
     }
+}
+
+export function getTelegrafBot<C extends Context = Context>(): Telegraf<C> {
+    return new Telegraf<C>(botToken ?? "");
 }

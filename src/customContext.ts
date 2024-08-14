@@ -7,7 +7,8 @@ export interface SelectionChatItem {
 }
 
 export interface ChatItem {
-    id: number
+    id: number,
+    lastMessageId?: number
 }
 
 interface AuthSessionData {
