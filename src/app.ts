@@ -8,9 +8,10 @@ import setChatsScene from "./scenes/setChatsScene";
 import * as searchWorker from "./workers/SearchWorker";
 import { getTelegrafBot } from "./tools/telegram";
 import { initBotCommands } from "./tools/setBotCommands";
+import promptsScene from "./scenes/PromptsScene";
 
 const bot = getTelegrafBot<CustomContext>();
-const stage = new Scenes.Stage<CustomContext>([ authScene, setChatsScene ], { defaultSession: ({ }) });
+const stage = new Scenes.Stage<CustomContext>([ authScene, setChatsScene, promptsScene ], { defaultSession: ({ }) });
 
 bot.use(sessionMiddleware);
 bot.use(stage.middleware());

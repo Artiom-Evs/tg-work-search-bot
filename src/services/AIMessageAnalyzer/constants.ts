@@ -2,7 +2,11 @@
 export const GPT_MODEL = "gpt-4o-mini";
 export const GPT_MAX_TOKENS = 16 * 1024;
 
-export const PROMPT_TEMPLATE = `
+export enum PromptNames {
+    DefineTargetMessages= "define-target-messages",
+};
+
+export const DEFINE_TARGET_MESSAGES_PROMPT_TEMPLATE = `
 {0}
 
 I'm passing you a list of messages as a CSV table with columns "chatId", "messageId" and "messageText".
@@ -24,8 +28,9 @@ Don't give me wrong data, otherwise I won't be able to process it.
 Good luck!
 `;
 
-export const DEFAULT_USER_PROMPT = `
+export const DEFAULT_DEFINE_TARGET_MESSAGES_PROMPT = `
 You are an experienced business analyst in the IT field.
 I develop custom websites.
 I want you to help me find messages in one of the chats from people who need a website.
+I am only interested in the topic of website development.
 `;

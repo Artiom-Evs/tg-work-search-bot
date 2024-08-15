@@ -19,12 +19,15 @@ interface AuthSessionData {
 interface CustomSceneSessionData extends Scenes.WizardSessionData {
     phoneNumber?: string,
     secretCode?: string,
-    chats?: SelectionChatItem[]
+    chats?: SelectionChatItem[],
+    promptName?: string,
+    tempMessageIds: number[]
 }
 
 export interface CustomSession extends Scenes.WizardSession<CustomSceneSessionData> {
     auth: AuthSessionData,
-    chats?: ChatItem[]
+    chats?: ChatItem[],
+    customPrompts?: Record<string, string>
 }
 
 export interface CustomContext extends Context {

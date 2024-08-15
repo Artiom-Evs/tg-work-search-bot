@@ -11,16 +11,20 @@ const commands: BotCommand[] = [
         description: "Get help"
     },
     {
-        command: "exit",
-        description: "Exit from the bot"
+        command: "chats",
+        description: "Set chats to search"
+    },
+    {
+        command: "prompts",
+        description: "Set custom prompts"
     },
     {
         command: "me",
         description: "Get information about yourself"
     },
     {
-        command: "chats",
-        description: "Set chats to search"
+        command: "exit",
+        description: "Exit from the bot"
     }
 ];
 
