@@ -34,9 +34,9 @@ const jsonSchema: ResponseFormatJSONSchema.JSONSchema = {
 }
 
 class AIMessageAnalyzer {
-    public async defineTargetMessages(messages: Api.Message[]): Promise<TargetMessageAIResponse[]> {
+    public async defineTargetMessages(messages: Api.Message[], customPrompt: string = DEFAULT_DEFINE_TARGET_MESSAGES_PROMPT): Promise<TargetMessageAIResponse[]> {
         const messagesCsv = this.convertMessagesToCSV(messages);
-        const prompt = DEFINE_TARGET_MESSAGES_PROMPT_TEMPLATE.replace("{0}", DEFAULT_DEFINE_TARGET_MESSAGES_PROMPT).replace("{1}", messagesCsv);
+        const prompt = DEFINE_TARGET_MESSAGES_PROMPT_TEMPLATE.replace("{0}", customPrompt).replace("{1}", messagesCsv);
         const completion = await this.getAICompletion(prompt);
         const text = completion.choices[0].message.content ?? "";
         const response = JSON.parse(text) as AnalyzeMessagesAIResponse;

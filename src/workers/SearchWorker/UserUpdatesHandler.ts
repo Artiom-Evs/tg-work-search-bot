@@ -8,6 +8,7 @@ import EventEmitter = require("events");
 import { TargetUpdateInfo, UpdateInfo } from "./types";
 import messageAnalyzer from "../../services/AIMessageAnalyzer";
 import { TargetMessageAIResponse } from "../../services/AIMessageAnalyzer/types";
+import { PromptNames } from "../../services/AIMessageAnalyzer/constants";
 
 export class UserUpdatesHandler {
     private _userId: number;
@@ -55,7 +56,7 @@ export class UserUpdatesHandler {
         if (messages.length === 0) 
             return;
 
-        const targetMessages = await messageAnalyzer.defineTargetMessages(messages);
+        const targetMessages = await messageAnalyzer.defineTargetMessages(messages, userData.customPrompts?.[PromptNames.DefineTargetMessages]);
         const targetUpdates = this.buildTargetUpdates(targetMessages, messages, chat);
 
         if (targetUpdates.length === 0) 
