@@ -5,7 +5,9 @@ import { getClient, getTelegrafBot } from "../../tools/telegram";
 import { Markup, Telegraf } from "telegraf";
 import { Collection } from "mongodb";
 import EventEmitter = require("events");
-import { TargetUpdateInfo } from "./types";
+import { TargetUpdateInfo, UpdateInfo } from "./types";
+import messageAnalyzer from "../../services/AIMessageAnalyzer";
+import { TargetMessageAIResponse } from "../../services/AIMessageAnalyzer/types";
 
 export class UserUpdatesHandler {
     private _userId: number;
@@ -26,11 +28,10 @@ export class UserUpdatesHandler {
         }
         
         const client = await getClient(userData.auth.session);
-        const bot = getTelegrafBot();
         
         try {
             for (const chat of userData?.chats ?? []) {
-                await this.handleChatUpdates(userData, chat, client, bot);
+                await this.handleChatUpdates(userData, chat, client);
             }
         }
         catch (e) {
@@ -42,20 +43,43 @@ export class UserUpdatesHandler {
         }
     }
 
-    private async handleChatUpdates(userData: CustomSession, chatItem: ChatItem, client: TelegramClient, bot: Telegraf): Promise<void> {
+    private async handleChatUpdates(userData: CustomSession, chatItem: ChatItem, client: TelegramClient): Promise<void> {
         const chat = await client.getEntity(chatItem.id) as Api.Channel;
-        const updates = await client.getMessages(chatItem.id, {
-            search: "wordpress",
+        
+        const messages = await client.getMessages(chatItem.id, {
             limit: 100,
             minId: chatItem.lastMessageId ?? 0
         });
 
-        if (updates.length === 0) return;
+        if (messages.length === 0) 
+            return;
 
-        for (const message of updates) {
-            await this.onUpdate?.({ userId: this._userId, chat, message });
+        const targetMessages = await messageAnalyzer.defineTargetMessages(messages);
+        const targetUpdates = this.buildTargetUpdates(targetMessages, messages, chat);
+
+        if (targetUpdates.length === 0) 
+            return;
+
+        for (const update of targetUpdates) {
+            await this.onUpdate?.(update);
         }
 
-        chatItem.lastMessageId = Math.max(...updates.map(u => u.id));
+        chatItem.lastMessageId = Math.max(...messages.map(m => m.id));
+    }
+
+    private buildTargetUpdates(targetMessages: TargetMessageAIResponse[], messages: Api.Message[], chat: Api.Channel): TargetUpdateInfo[] {
+        return targetMessages.map(tm => {
+            const message = messages.find(m => m.id === tm.messageId);
+
+            if (!message) 
+                throw new Error(`Uncorrect target message: ${JSON.stringify(tm, null, 4)}`)
+
+            return {
+                userId: this._userId,
+                summary: tm.summary,
+                chat,
+                message,
+            };
+        })
     }
 }

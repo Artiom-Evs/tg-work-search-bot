@@ -1,7 +1,6 @@
-import { Markup, Telegraf } from "telegraf";
+import { Markup } from "telegraf";
 import { getTelegrafBot } from "../../tools/telegram";
-import { Api } from "telegram";
-import { TargetUpdateInfo } from "./types";
+import { TargetUpdateInfo, UpdateInfo } from "./types";
 
 class UpserUpdateNotifier {
     private _bot = getTelegrafBot();
@@ -30,17 +29,21 @@ class UpserUpdateNotifier {
         return `https://t.me/c/${chatId}/${messageId ?? ""}`;
     }
 
-    private getNotificationText(update: TargetUpdateInfo): string {
+        private getNotificationText(update: TargetUpdateInfo): string {
         const messageId = update.message.id;
         const chatId = Number(update.message.chat?.id ?? 0);
         const messageLink = this.getLink(chatId, messageId);
-        const chatTitle = this.escapText(update.chat.title);
+        const chatTitle = this.escapeText(update.chat.title);
+        const summaryText = this.escapeText(update.summary);
         
-        return `[Message](${messageLink}) found in the "${chatTitle}" chat\\.`;
+        return `[Message](${messageLink}) found in the "${chatTitle}" chat\\.
+
+Summary: ${summaryText}
+        `;
     }
 
-    private escapText(text: string): string {
-        return text.replace(/_/g, "\\_").replace(/-/g, "\\-");
+    private escapeText(text: string): string {
+        return text.replace(/_/g, "\\_").replace(/-/g, "\\-").replace(/\./g, "\\.");
     }
 }
 

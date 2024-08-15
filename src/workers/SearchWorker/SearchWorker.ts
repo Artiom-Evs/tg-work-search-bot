@@ -25,13 +25,14 @@ function handleCommand(command: string): void {
     }
 }
 
-function startSearch() {
+    function startSearch() {
     if (!timer)
         loop();
 }
 
 function stopSearch() {
     clearTimeout(timer);
+    timer = undefined
     stopInvoked = true;
 }
 
