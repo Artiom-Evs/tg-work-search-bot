@@ -39,6 +39,7 @@ export class UserUpdatesHandler {
         }
         finally {
             await client.disconnect();
+            await client.destroy();
             await store.set(`${this._userId}`, userData);
         }
     }

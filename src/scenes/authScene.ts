@@ -43,6 +43,7 @@ async function step2Handler(ctx: CustomContext) {
     }
     finally {
         await client.disconnect();
+        await client.destroy();
     }
 }
 
@@ -75,6 +76,7 @@ async function step4Handler(ctx: CustomContext) {
     }
     finally {
         await client.disconnect();
+        await client.destroy();
     }
     await ctx.reply("You are successfully authorized!");
     return ctx.scene.leave();

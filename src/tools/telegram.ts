@@ -25,6 +25,7 @@ export async function safeAction<T = any>(session: string, action: (client: Tele
     }
     finally {
         await client.disconnect();
+        await client.destroy();
     }
 }
 
