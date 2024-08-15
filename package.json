@@ -1,7 +1,7 @@
 {
   "name": "tg-work-search-bot",
   "version": "0.0.0",
-  "description": "raid-api",
+  "description": "A bot project to search for specific messages using AI in user chats.",
   "main": "build/app.js",
   "scripts": {
     "dev": "npm run clean & npm run build & node --env-file .env.local build/app",
