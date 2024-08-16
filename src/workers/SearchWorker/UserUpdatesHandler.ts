@@ -6,9 +6,9 @@ import { Markup, Telegraf } from "telegraf";
 import { Collection } from "mongodb";
 import EventEmitter = require("events");
 import { TargetUpdateInfo, UpdateInfo } from "./types";
-import messageAnalyzer from "../../services/AIMessageAnalyzer";
-import { TargetMessageAIResponse } from "../../services/AIMessageAnalyzer/types";
-import { PromptNames } from "../../services/AIMessageAnalyzer/constants";
+import messageAnalyzer from "../../services/AI/MessageAnalyzer";
+import { TargetMessageAIResponse } from "../../services/AI/types";
+import { PromptNames } from "../../services/AI/constants";
 
 export class UserUpdatesHandler {
     private _userId: number;

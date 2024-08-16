@@ -33,7 +33,7 @@ const jsonSchema: ResponseFormatJSONSchema.JSONSchema = {
     schema: dataSchema as any
 }
 
-class AIMessageAnalyzer {
+class MessageAnalyzer {
     public async defineTargetMessages(messages: Api.Message[], customPrompt: string = DEFAULT_DEFINE_TARGET_MESSAGES_PROMPT): Promise<TargetMessageAIResponse[]> {
         const messagesCsv = this.convertMessagesToCSV(messages);
         const prompt = DEFINE_TARGET_MESSAGES_PROMPT_TEMPLATE.replace("{0}", customPrompt).replace("{1}", messagesCsv);
@@ -71,5 +71,5 @@ class AIMessageAnalyzer {
     }
 }
 
-const messageAnalyzer = new AIMessageAnalyzer();
+const messageAnalyzer = new MessageAnalyzer();
 export default messageAnalyzer;
