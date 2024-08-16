@@ -9,9 +9,10 @@ import * as searchWorker from "./workers/SearchWorker";
 import { getTelegrafBot } from "./tools/telegram";
 import { initBotCommands } from "./tools/setBotCommands";
 import promptsScene from "./scenes/PromptsScene";
+import responseGenerationScene from "./scenes/ResponseGenerationScene";
 
 const bot = getTelegrafBot<CustomContext>();
-const stage = new Scenes.Stage<CustomContext>([ authScene, setChatsScene, promptsScene ], { defaultSession: ({ }) });
+const stage = new Scenes.Stage<CustomContext>([ authScene, setChatsScene, promptsScene, responseGenerationScene ], { defaultSession: ({ }) });
 
 bot.use(sessionMiddleware);
 bot.use(stage.middleware());

@@ -1,0 +1,76 @@
+import { Markup, Scenes } from "telegraf";
+import { CustomContext } from "../customContext";
+import { safeAction } from "../tools/telegram";
+import responseGenerator from "../services/AI/ResponseGenerator";
+import { PromptNames } from "../services/AI/constants";
+
+const responseGenerationScene = new Scenes.WizardScene<CustomContext>(
+    "response-generation",
+    step1Handler
+);
+
+async function step1Handler(ctx: CustomContext) {
+    const chatId = "chatId" in ctx.scene.state ? ctx.scene.state.chatId as number : null;
+    const messageId = "messageId" in ctx.scene.state ? ctx.scene.state.messageId as number : null;
+
+    if (!chatId || !messageId)
+        return await ctx.reply("Chat ID and message ID are required to generate a response.");
+
+    const message = await safeAction(ctx.session.auth.session, async (client) => {
+        await client.getDialogs();
+        const messages = await client.getMessages(`${chatId}`, { ids: messageId });
+        return messages[0] ?? null;
+    }, (err) => {
+        ctx.reply(`Error while getting original message. Error: ${err.message}.`);
+    });
+
+    if (!message)
+        return await ctx.reply("Original message not found.");
+    
+ctx.scene.session.response_text = await responseGenerator.generateResponse(message, ctx.session.customPrompts?.[PromptNames.GenerateResponse]);
+    
+const keyboard = Markup.inlineKeyboard([
+    Markup.button.callback("Send", "send_response"),
+    Markup.button.callback("Regenerate", "regenerate_response"),
+    Markup.button.callback("Cancel", "cancel")
+]);
+    await ctx.reply(`Generated response:\n\n${ctx.scene.session.response_text}`, keyboard);
+}
+
+responseGenerationScene.action("send_response", async (ctx) => {
+    const chatId = "chatId" in ctx.scene.state ? ctx.scene.state.chatId as number : null;
+    const messageId = "messageId" in ctx.scene.state ? ctx.scene.state.messageId as number : null;
+
+    if (!chatId || !messageId)
+        return await ctx.reply("Chat ID and message ID are required to generate a response.");
+
+    const message = await safeAction(ctx.session.auth.session, async (client) => {
+        await client.getDialogs();
+        return await client.sendMessage(chatId, {
+            message: ctx.scene.session.response_text,
+            replyTo: messageId
+        });
+    }, (err) => {
+        ctx.reply(`Error while getting original message. Error: ${err.message}.`);
+    });
+
+    if (!message)
+        return await ctx.reply("Error while sending response.");
+
+    await ctx.deleteMessage();
+    await ctx.answerCbQuery("Your response successfully sent.");
+    await ctx.scene.leave();
+});
+
+responseGenerationScene.action("regenerate_response", async (ctx) => {
+    ctx.wizard.selectStep(0);
+    await ctx.deleteMessage();
+    await step1Handler(ctx);
+});
+
+responseGenerationScene.action("cancel", async (ctx) => {
+    await ctx.deleteMessage();
+    await ctx.scene.leave();
+});
+
+export default responseGenerationScene;

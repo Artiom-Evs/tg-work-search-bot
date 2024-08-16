@@ -29,5 +29,11 @@ privateCommands.command("chats", authMiddleware, async (ctx) => await ctx.scene.
 privateCommands.command("prompts", authMiddleware, async (ctx) => await ctx.scene.enter("prompts"));
 
 privateCommands.action("delete_notification", async (ctx) => await ctx.deleteMessage());
+privateCommands.action(/generate_response_(.+)-(.+)/, authMiddleware, async (ctx) => {
+    const chatId = Number(ctx.match[1]);
+    const messageId = Number(ctx.match[2]);
+    
+    await ctx.scene.enter("response-generation", { chatId, messageId });
+});
 
 export default privateCommands;

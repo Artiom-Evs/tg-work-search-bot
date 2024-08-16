@@ -1,6 +1,7 @@
 import { Markup } from "telegraf";
 import { getTelegrafBot } from "../../tools/telegram";
 import { TargetUpdateInfo, UpdateInfo } from "./types";
+import { message } from "telegram/client";
 
 class UpserUpdateNotifier {
     private _bot = getTelegrafBot();
@@ -10,7 +11,7 @@ class UpserUpdateNotifier {
     }
 
     public async notifyUser(update: TargetUpdateInfo): Promise<void> {
-        const keyboard = this.getKeyboard();
+        const keyboard = this.getKeyboard(update);
         const notificationText = this.getNotificationText(update);
 
         await this._bot.telegram.sendMessage(update.userId, notificationText, {
@@ -19,8 +20,9 @@ class UpserUpdateNotifier {
         });
     }
 
-    private getKeyboard() {
+    private getKeyboard(update: TargetUpdateInfo) {
         return Markup.inlineKeyboard([
+            Markup.button.callback("Generate response", `generate_response_${update.chat.id}-${update.message.id}`),
             Markup.button.callback("Delete", "delete_notification"),
         ]);
     }

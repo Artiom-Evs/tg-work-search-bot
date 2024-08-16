@@ -21,7 +21,8 @@ interface CustomSceneSessionData extends Scenes.WizardSessionData {
     secretCode?: string,
     chats?: SelectionChatItem[],
     promptName?: string,
-    tempMessageIds: number[]
+    tempMessageIds: number[],
+    response_text?: string
 }
 
 export interface CustomSession extends Scenes.WizardSession<CustomSceneSessionData> {
