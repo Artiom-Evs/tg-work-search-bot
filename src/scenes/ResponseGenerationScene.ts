@@ -18,6 +18,7 @@ async function step1Handler(ctx: CustomContext) {
         return await ctx.reply("Chat ID and message ID are required to generate a response.");
 
     const message = await safeAction(ctx.session.auth.session, async (client) => {
+        // TODO: entities preloading should be implemented in the future
         await client.getDialogs();
         const messages = await client.getMessages(`${chatId}`, { ids: messageId });
         return messages[0] ?? null;
@@ -53,6 +54,7 @@ async function step2Handler(ctx: CustomContext) {
         return await ctx.reply("Chat ID and message ID are required to generate a response.");
 
     const message = await safeAction(ctx.session.auth.session, async (client) => {
+        // TODO: entities preloading should be implemented in the future
         await client.getDialogs();
         const messages = await client.getMessages(`${chatId}`, { ids: messageId });
         return messages[0] ?? null;
