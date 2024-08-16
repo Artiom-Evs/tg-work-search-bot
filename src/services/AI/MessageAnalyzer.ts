@@ -65,7 +65,7 @@ class MessageAnalyzer {
             ]
         })
             .catch(err => {
-                console.log("Error while getting answer from OpenAI API.");
+                console.log("Error while getting response from OpenAI API.");
                 throw err;
             });
     }

@@ -3,7 +3,8 @@ export const GPT_MODEL = "gpt-4o-mini";
 export const GPT_MAX_TOKENS = 16 * 1024;
 
 export enum PromptNames {
-    DefineTargetMessages= "define-target-messages",
+    DefineTargetMessages = "define-target-messages",
+    GenerateResponse = "generate-response",
 };
 
 export const DEFINE_TARGET_MESSAGES_PROMPT_TEMPLATE = `
@@ -33,4 +34,22 @@ You are an experienced business analyst in the IT field.
 I develop custom websites.
 I want you to help me find messages in one of the chats from people who need a website.
 I am only interested in the topic of website development.
+`;
+
+export const GENERATE_RESPONSE_PROMPT_TEMPLATE = `
+{0}
+
+It is a text of the user message:
+{1}
+
+`;
+
+export const DEFAULT_GENERATE_RESPONSE_PROMPT = `
+You are an experienced sales specialist. 
+I need you to respond to a message from a client who wants to order a website. 
+Answer on behalf of our company.
+For reference: We develop custom websites based both on classic WordPress solutions and more technologically advanced and productive HeadLess solutions that use WordPress as the administrative part, and the front end works on React and Next.JS technologies. 
+The message should arouse interest and a desire to get in touch with our company.
+The message is intended for a chat or group in one of the instant messengers, so the message should be relatively short.
+do not add explanatory text to your answer.
 `;
