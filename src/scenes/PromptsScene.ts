@@ -1,6 +1,6 @@
 import { Markup, Scenes } from "telegraf";
 import { CustomContext } from "../customContext";
-import { DEFAULT_DEFINE_TARGET_MESSAGES_PROMPT, PromptNames } from "../services/AIMessageAnalyzer/constants";
+import { DEFAULT_DEFINE_TARGET_MESSAGES_PROMPT, DEFAULT_GENERATE_RESPONSE_PROMPT, PromptNames } from "../services/AI/constants";
 
 const promptsScene = new Scenes.WizardScene<CustomContext>(
     "prompts",
@@ -85,6 +85,7 @@ async function step2Handler(ctx: CustomContext) {
 async function sendStartMessage(ctx: CustomContext) {
     const keyboard = Markup.inlineKeyboard([
         Markup.button.callback("Define target messages", `prompt_${PromptNames.DefineTargetMessages}`),
+        Markup.button.callback("Generate response", `prompt_${PromptNames.GenerateResponse}`),
         Markup.button.callback("Cancel", "cancel")
     ], {
         columns: 1
@@ -105,6 +106,8 @@ function getDefaultPrompt(name: string): string {
     switch (name) {
         case PromptNames.DefineTargetMessages:
             return DEFAULT_DEFINE_TARGET_MESSAGES_PROMPT;
+        case PromptNames.GenerateResponse:
+            return DEFAULT_GENERATE_RESPONSE_PROMPT;
         default:
             throw new Error(`Unknown prompt name: "${name}".`);
     };
