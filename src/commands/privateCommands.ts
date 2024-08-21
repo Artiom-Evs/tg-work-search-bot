@@ -28,7 +28,12 @@ Phone: ${me.phone ?? "-"}
 privateCommands.command("chats", authMiddleware, async (ctx) => await ctx.scene.enter("set-chats"));
 privateCommands.command("prompts", authMiddleware, async (ctx) => await ctx.scene.enter("prompts"));
 
-privateCommands.action("delete_notification", async (ctx) => await ctx.deleteMessage());
+privateCommands.action("delete_notification", async (ctx) => {
+    await ctx.deleteMessage().catch(async () => {
+        await ctx.answerCbQuery("I can't delete this message :(");
+    });
+});;
+
 privateCommands.action(/generate_response_(.+)-(.+)/, authMiddleware, async (ctx) => {
     const chatId = Number(ctx.match[1]);
     const messageId = Number(ctx.match[2]);
