@@ -48,10 +48,12 @@ export class UserUpdatesHandler {
     private async handleChatUpdates(userData: CustomSession, chatItem: ChatItem, client: TelegramClient): Promise<void> {
         const chat = await client.getEntity(chatItem.id) as Api.Channel;
         
-        const messages = await client.getMessages(chatItem.id, {
+        let messages = await client.getMessages(chatItem.id, {
             limit: 100,
-            minId: chatItem.lastMessageId ?? 0
+            minId: chatItem.lastMessageId ?? 0,
         });
+
+        messages = messages.filter(m => Number((m.fromId as any)?.userId ?? 0) !== this._userId);
 
         if (messages.length === 0) 
             return;
