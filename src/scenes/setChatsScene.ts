@@ -2,6 +2,8 @@ import { Markup, Scenes } from "telegraf";
 import { SelectionChatItem, CustomContext } from "../customContext";
 import { safeAction } from "../tools/telegram";
 
+const PER_PAGE = 25;
+
 const setChatsScene = new Scenes.WizardScene<CustomContext>(
     "set-chats",
     step1Handler
@@ -14,9 +16,7 @@ async function step1Handler(ctx: CustomContext) {
         chat.checked = ctx.session.chats?.some(c => c.id === chat.id) ?? false;
     });
 
-    const keyboard = generateKeyboard(ctx.scene.session.chats);
-
-    await ctx.reply("Select chats to search", keyboard);
+    await sendChatsPickingMessage(ctx);
     await ctx.wizard.next();
 };
 
@@ -29,10 +29,22 @@ setChatsScene.action(/toggle_(.+)/, async (ctx) => {
 
     chatItem.checked = !chatItem.checked;
 
-    return await ctx.editMessageText(
-        "Select chats:",
-        generateKeyboard(ctx.scene.session.chats ?? [])
-    );
+    await updateChatsPickingMessage(ctx);
+});
+
+setChatsScene.action("previous_page", async (ctx) => {
+    if (ctx.scene.session.pageNumber && ctx.scene.session.pageNumber > 1)
+        ctx.scene.session.pageNumber -= 1;
+    else 
+        ctx.scene.session.pageNumber = 1;
+    
+        await updateChatsPickingMessage(ctx);
+});
+
+setChatsScene.action("next_page", async (ctx) => {
+    ctx.scene.session.pageNumber = (ctx.scene.session.pageNumber ?? 1) + 1;
+
+    await updateChatsPickingMessage(ctx);
 });
 
 setChatsScene.action("accept", async (ctx) => {
@@ -61,22 +73,43 @@ async function getChatItems(userSession: string): Promise<SelectionChatItem[]> {
     }));
 }
 
-function generateKeyboard(chatItems: SelectionChatItem[]) {
-    return Markup.inlineKeyboard(
+function generateKeyboard(chatItems: SelectionChatItem[], pageNumber: number, perPage: number) {
+    const pageItems = chatItems.slice((pageNumber - 1) * perPage, pageNumber * perPage);
+    const pageButtons = pageItems.map((item, index) => [
+        Markup.button.callback(
+            `${item.checked ? "✅" : "⬜️"}  ${(pageNumber - 1) * perPage + 1 + index}. ${item.title}`,
+            `toggle_${item.id}`)
+    ]);
+
+    return Markup.inlineKeyboard([
+        ...pageButtons,
         [
-            ...chatItems.map((chatItem) =>
-                Markup.button.callback(
-                    `${chatItem.checked ? "✅" : "⬜️"} ${chatItem.title}`,
-                    `toggle_${chatItem.id}`
-                )
-            ),
-            ...[
-                Markup.button.callback("Accept", "accept"),
-                Markup.button.callback("Cancel", "cancel"),
-            ]
+            Markup.button.callback("<< Back", "previous_page", pageNumber === 1),
+            Markup.button.callback("Next >>", "next_page", pageNumber * perPage >= chatItems.length)
         ],
-        { columns: 1 }
-    );
+        [
+            Markup.button.callback("Accept", "accept"),
+            Markup.button.callback("Cancel", "cancel"),
+        ]
+    ]);
+}
+
+async function sendChatsPickingMessage(ctx: CustomContext) {
+    const keyboard = generateKeyboard(
+        ctx.scene.session.chats ?? [], 
+        ctx.scene.session.pageNumber ?? 1, 
+        PER_PAGE);
+
+    await ctx.reply("Select chats to search:", keyboard);
+}
+
+async function updateChatsPickingMessage(ctx: CustomContext) {
+    const keyboard = generateKeyboard(
+        ctx.scene.session.chats ?? [], 
+        ctx.scene.session.pageNumber ?? 1, 
+        PER_PAGE);
+
+    await ctx.editMessageText("Select chats to search:", keyboard);
 }
 
 export default setChatsScene;

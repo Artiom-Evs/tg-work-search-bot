@@ -20,6 +20,7 @@ interface CustomSceneSessionData extends Scenes.WizardSessionData {
     phoneNumber?: string,
     secretCode?: string,
     chats?: SelectionChatItem[],
+    pageNumber?: number,
     promptName?: string,
     tempMessageIds: number[],
     response_text?: string
