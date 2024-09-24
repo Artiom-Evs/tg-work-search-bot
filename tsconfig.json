@@ -7,7 +7,8 @@
     "rootDir": "src",
     "outDir": "build",
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "experimentalDecorators": true
   },
   "include": ["src/**/*.ts"],
   "exclude": [

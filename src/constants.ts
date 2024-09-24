@@ -1,7 +1,6 @@
 import { BotCommand } from "telegraf/typings/core/types/typegram";
-import { getTelegrafBot } from "./telegram";
 
-const commands: BotCommand[] = [
+export const BOT_COMMANDS: BotCommand[] = [
     {
         command: "start",
         description: "Start the bot"
@@ -27,8 +26,3 @@ const commands: BotCommand[] = [
         description: "Exit from the bot"
     }
 ];
-
-export async function initBotCommands(): Promise<void> {
-    const bot = getTelegrafBot();
-    await bot.telegram.setMyCommands(commands);
-}
