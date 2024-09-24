@@ -1,7 +1,7 @@
 import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { BotService } from "./bot.service";
 import { Composer } from "telegraf";
-import { CustomContext } from "../customContext";
+import { CustomContext } from "../types/custom-context.interfaces";
 
 @Injectable()
 export class PublicCommandsService extends Composer<CustomContext> implements OnModuleInit {

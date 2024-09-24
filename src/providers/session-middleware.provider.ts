@@ -1,7 +1,7 @@
 import { Provider } from "@nestjs/common";
 import { SESSION_STORE } from "./session-store.provider";
 import { session, SessionStore } from "telegraf";
-import { CustomSession } from "../customContext";
+import { CustomSession } from "../types/custom-context.interfaces";
 
 export const SESSION_MIDDLEWARE = "SESSION_MIDDLEWARE";
 

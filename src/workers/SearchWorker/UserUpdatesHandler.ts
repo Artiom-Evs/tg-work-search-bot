@@ -1,5 +1,5 @@
 import { Api, TelegramClient } from "telegram";
-import { ChatItem, CustomSession } from "../../customContext";
+import { ChatItem, CustomSession } from "../../types/custom-context.interfaces";
 import { store } from "../../middlewares/sessionMiddleware";
 import { getClient, getTelegrafBot } from "../../tools/telegram";
 import { Markup, Telegraf } from "telegraf";

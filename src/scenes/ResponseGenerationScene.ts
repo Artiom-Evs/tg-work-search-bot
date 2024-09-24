@@ -1,5 +1,5 @@
 import { Markup, Scenes } from "telegraf";
-import { CustomContext } from "../customContext";
+import { CustomContext } from "../types/custom-context.interfaces";
 import { safeAction } from "../tools/telegram";
 import responseGenerator from "../services/AI/ResponseGenerator";
 import { DEFAULT_GENERATE_RESPONSE_PROMPT, PromptNames } from "../services/AI/constants";

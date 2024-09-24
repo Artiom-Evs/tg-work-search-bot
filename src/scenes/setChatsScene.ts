@@ -1,5 +1,5 @@
 import { Markup, Scenes } from "telegraf";
-import { SelectionChatItem, CustomContext } from "../customContext";
+import { SelectionChatItem, CustomContext } from "../types/custom-context.interfaces";
 import { safeAction } from "../tools/telegram";
 
 const PER_PAGE = 25;

@@ -1,6 +1,6 @@
 import { Mongo } from "@telegraf/session/mongodb";
 import { Context, session } from "telegraf";
-import { CustomSession } from "../customContext";
+import { CustomSession } from "../types/custom-context.interfaces";
 
 export interface SessionData {
     auth: {

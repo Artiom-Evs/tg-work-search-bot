@@ -1,6 +1,6 @@
 import { parentPort } from "worker_threads";
 import docStorage from "../../services/docStorage";
-import { CustomSession } from "../../customContext";
+import { CustomSession } from "../../types/custom-context.interfaces";
 import { UserUpdatesHandler } from "./UserUpdatesHandler";
 import updateNotifier from "./UserUpdateNotifier";
 

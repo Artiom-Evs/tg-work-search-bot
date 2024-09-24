@@ -1,5 +1,5 @@
 import { Scenes } from "telegraf";
-import { CustomContext } from "../customContext";
+import { CustomContext } from "../types/custom-context.interfaces";
 import { getClient } from "../tools/telegram";
 
 const authScene = new Scenes.WizardScene<CustomContext>(

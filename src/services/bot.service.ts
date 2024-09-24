@@ -1,7 +1,7 @@
 import { Inject, Injectable, OnApplicationShutdown, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { MiddlewareFn, Scenes, Telegraf } from 'telegraf';
 import config from "../app.config";
-import { CustomContext } from '../customContext';
+import { CustomContext } from '../types/custom-context.interfaces';
 import { BOT_COMMANDS } from '../constants';
 import { SESSION_MIDDLEWARE } from '../providers/session-middleware.provider';
 import authScene from '../scenes/authScene';

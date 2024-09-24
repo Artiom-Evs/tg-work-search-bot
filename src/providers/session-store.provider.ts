@@ -1,6 +1,6 @@
 import { Provider } from "@nestjs/common";
 import { Mongo } from "@telegraf/session/mongodb";
-import { CustomSession } from "../customContext";
+import { CustomSession } from "../types/custom-context.interfaces";
 import { SessionStore } from "telegraf";
 import config from "../app.config";
 
