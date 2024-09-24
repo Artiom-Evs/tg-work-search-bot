@@ -1,8 +1,6 @@
 import { Inject, Injectable, OnApplicationShutdown, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { MiddlewareFn, Scenes, Telegraf } from 'telegraf';
 import config from "../app.config";
-import publicCommands from '../commands/publicCommands';
-import privateCommands from '../commands/privateCommands';
 import { CustomContext } from '../customContext';
 import { BOT_COMMANDS } from '../constants';
 import { SESSION_MIDDLEWARE } from '../providers/session-middleware.provider';
@@ -30,9 +28,6 @@ export class BotService extends Telegraf<CustomContext> implements OnModuleInit,
 
         this.use(sessionMiddleware);
         this.use(stage.middleware());
-        
-        this.use(publicCommands);
-        this.use(privateCommands);
     }
     
     async onModuleInit() {
