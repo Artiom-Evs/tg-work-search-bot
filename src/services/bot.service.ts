@@ -4,7 +4,6 @@ import config from "../app.config";
 import { CustomContext } from '../customContext';
 import { BOT_COMMANDS } from '../constants';
 import { SESSION_MIDDLEWARE } from '../providers/session-middleware.provider';
-import authMiddleware from '../middlewares/authMiddleware';
 import authScene from '../scenes/authScene';
 import setChatsScene from '../scenes/setChatsScene';
 import promptsScene from '../scenes/PromptsScene';

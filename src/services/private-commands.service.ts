@@ -3,7 +3,7 @@ import { BotService } from "./bot.service";
 import { Composer, SessionStore } from "telegraf";
 import { CustomContext, CustomSession } from "../customContext";
 import { SESSION_STORE } from "../providers/session-store.provider";
-import authMiddleware from "../middlewares/authMiddleware";
+import authMiddleware from "../middlewares/auth.middleware";
 import { safeAction } from "../tools/telegram";
 
 @Injectable()
