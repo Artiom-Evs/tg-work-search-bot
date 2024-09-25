@@ -2,7 +2,7 @@ import { ChatCompletion, ResponseFormatJSONSchema } from "openai/resources";
 import { Api } from "telegram";
 import openai from "../../tools/openai";
 import { DEFAULT_DEFINE_TARGET_MESSAGES_PROMPT, GPT_MAX_TOKENS, GPT_MODEL, DEFINE_TARGET_MESSAGES_PROMPT_TEMPLATE } from "./constants";
-import { UpdateInfo } from "../../workers/SearchWorker/types";
+import { ChatUpdateInfo } from "../../types/chat-update-info.interfaces"
 import { JSONSchema } from "openai/lib/jsonschema";
 import { AnalyzeMessagesAIResponse, TargetMessageAIResponse } from "./types";
 

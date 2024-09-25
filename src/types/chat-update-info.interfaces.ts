@@ -1,11 +1,11 @@
 import { Api } from "telegram";
 
-export interface UpdateInfo {
+export interface ChatUpdateInfo {
     userId: number,
     chat: Api.Channel,
     message: Api.Message
 }
 
-export interface TargetUpdateInfo extends UpdateInfo {
+export interface TargetChatUpdateInfo extends ChatUpdateInfo {
     summary: string
 }

@@ -37,3 +37,9 @@ export interface CustomContext extends Context {
     scene: Scenes.SceneContextScene<CustomContext, CustomSceneSessionData>,
     wizard: Scenes.WizardContextWizard<CustomContext>
 }
+
+
+export interface UserSessionDocument {
+    key: string,
+    session: CustomSession
+}

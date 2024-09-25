@@ -13,7 +13,7 @@ export class PublicCommandsService extends Composer<CustomContext> implements On
         this.start((ctx) => {
             ctx.scene.enter("authorization");
         });
-        
+
         this.help(async (ctx) => {
             await ctx.reply("I'm sorry! I can't help you yet :(");
         });
@@ -21,6 +21,5 @@ export class PublicCommandsService extends Composer<CustomContext> implements On
 
     onModuleInit() {
         this._bot.use(this);
-        console.debug("public commands added.");
     }
 }

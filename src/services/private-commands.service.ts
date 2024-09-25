@@ -26,15 +26,13 @@ export class PrivateCommandsService extends Composer<CustomContext> implements O
         this.action(/generate_response_(.+)-(.+)/, authMiddleware, async (ctx) => {
             const chatId = Number(ctx.match[1]);
             const messageId = Number(ctx.match[2]);
-            
+
             await this.generateMessageActionHandler(ctx, chatId, messageId);
         });
-        
     }
 
     onModuleInit() {
         this._bot.use(this);
-        console.debug("Private commands added.");
     }
 
     async chatsCommandHandler(ctx: CustomContext) {
@@ -49,13 +47,13 @@ export class PrivateCommandsService extends Composer<CustomContext> implements O
         const me = await safeAction(ctx.session.auth.session, async (client) => await client.getMe());
         if (!me)
             return await ctx.reply("Failed to get information about your Telegram profile.");
-        
+
         await ctx.reply(
-    `Name: ${me.firstName} ${me.lastName ?? ""}
+            `Name: ${me.firstName} ${me.lastName ?? ""}
     Username: ${me.username}
     Phone: ${me.phone ?? "-"}
     `);
-        }
+    }
 
     async exitCommandHandler(ctx: CustomContext) {
         // session should be deleted after all middlewares
@@ -73,6 +71,6 @@ export class PrivateCommandsService extends Composer<CustomContext> implements O
     }
 
     async generateMessageActionHandler(ctx: CustomContext, chatId: number, messageId: number) {
-        await ctx.scene.enter("response-generation", { chatId, messageId  });
+        await ctx.scene.enter("response-generation", { chatId, messageId });
     }
 }

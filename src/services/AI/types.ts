@@ -1,5 +1,3 @@
-import { UpdateInfo } from "../../workers/SearchWorker/types";
-
 export interface TargetMessageAIResponse {
     chatId: number,
     messageId: number,
