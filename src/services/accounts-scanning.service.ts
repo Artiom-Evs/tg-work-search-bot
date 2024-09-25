@@ -6,7 +6,7 @@ import config from "../app.config";
 import { ChatItem, UserSessionDocument } from "../types/custom-context.interfaces";
 import { AccountUpdatesHandlerService } from "./account-updates-handler.service";
 import { BotMessageSenderService } from "./bot-message-sender.service";
-import messageAnalyzer from "./AI/MessageAnalyzer";
+import { AIMessageAnalyzerService } from "./ai-message-analyzer.service";
 
 @Injectable()
 export class AccountsScanningService {
@@ -16,7 +16,8 @@ export class AccountsScanningService {
     constructor(
         @Inject(MONGODB_CONNECTION) private readonly _db: Db,
         @Inject(AccountUpdatesHandlerService) private readonly _updatesHandler: AccountUpdatesHandlerService,
-        @Inject(BotMessageSenderService) private readonly _messageSender: BotMessageSenderService
+        @Inject(BotMessageSenderService) private readonly _messageSender: BotMessageSenderService,
+        @Inject(AIMessageAnalyzerService) private readonly _messageAnalyzer: AIMessageAnalyzerService
     ) { }
 
     @Interval(config.accountsRescanPeriodMs)
@@ -51,7 +52,7 @@ export class AccountsScanningService {
                             arrayFilters: [{ "chat.id": chatId }]
                         });
 
-                    const targetMessages = await messageAnalyzer.defineTargetMessages(messages);
+                    const targetMessages = await this._messageAnalyzer.defineTargetMessages(messages);
 
                     if (targetMessages.length === 0)
                         continue;
