@@ -4,10 +4,6 @@ import config from "../app.config";
 import { CustomContext } from '../types/custom-context.interfaces';
 import { BOT_COMMANDS } from '../constants';
 import { SESSION_MIDDLEWARE } from '../providers/session-middleware.provider';
-import authScene from '../scenes/authScene';
-import setChatsScene from '../scenes/setChatsScene';
-import promptsScene from '../scenes/PromptsScene';
-import responseGenerationScene from '../scenes/ResponseGenerationScene';
 
 @Injectable()
 export class BotService extends Telegraf<CustomContext> implements OnModuleInit, OnModuleDestroy, OnApplicationShutdown {
@@ -16,17 +12,7 @@ export class BotService extends Telegraf<CustomContext> implements OnModuleInit,
     ) {
         super(config.botToken);
 
-        const stage = new Scenes.Stage<CustomContext>([ 
-            authScene, 
-            setChatsScene, 
-            promptsScene, 
-            responseGenerationScene 
-        ], { 
-            defaultSession: ({ })
-        });
-
         this.use(sessionMiddleware);
-        this.use(stage.middleware());
     }
     
     async onModuleInit() {

@@ -12,6 +12,8 @@ import { AccountUpdatesHandlerService } from "./services/account-updates-handler
 import { OpenAIProvider } from "./providers/openai.provider";
 import { AIMessageAnalyzerService } from "./services/ai-message-analyzer.service";
 import { AIResponseGeneratorService } from "./services/ai-response-generator.service";
+import { ResponseGenerationScene } from "./services/response-generation.scene";
+import { BotStageService } from "./services/bot-stage.service";
 
 @Module({
     imports: [
@@ -29,7 +31,9 @@ import { AIResponseGeneratorService } from "./services/ai-response-generator.ser
         AIResponseGeneratorService,
         BotMessageSenderService,
         AccountUpdatesHandlerService,
-        AccountsScanningService
+        AccountsScanningService,
+        ResponseGenerationScene,
+        BotStageService
     ]
 })
 export class AppModule {}

@@ -1,6 +1,6 @@
 import { Markup, Scenes } from "telegraf";
 import { CustomContext } from "../types/custom-context.interfaces";
-import { DEFAULT_DEFINE_TARGET_MESSAGES_PROMPT, DEFAULT_GENERATE_RESPONSE_PROMPT, PromptNames } from "../services/AI/constants";
+import { DEFAULT_DEFINE_TARGET_MESSAGES_PROMPT, DEFAULT_GENERATE_RESPONSE_PROMPT, PromptNames } from "../services/ai.constants";
 
 const promptsScene = new Scenes.WizardScene<CustomContext>(
     "prompts",
