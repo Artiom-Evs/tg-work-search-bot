@@ -12,11 +12,14 @@
   },
   "dependencies": {
     "@nestjs/common": "^10.4.4",
+    "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.4.4",
+    "@nestjs/platform-express": "^10.4.4",
     "@nestjs/schedule": "^4.1.1",
     "@telegraf/session": "^2.0.0-beta.7",
     "markdown-escape": "^2.0.0",
     "mongodb": "^6.8.0",
+    "nestjs-telegraf": "^2.8.1",
     "openai": "^4.55.7",
     "telegraf": "github:telegraf/telegraf",
     "telegram": "^2.23.10"

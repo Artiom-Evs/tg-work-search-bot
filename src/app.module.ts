@@ -1,39 +1,13 @@
-import { Module } from "@nestjs/common";
-import { BotService } from "./services/bot.service";
-import { SessionStoreProvider } from "./providers/session-store.provider";
-import { SessionMiddlewareProvider } from "./providers/session-middleware.provider";
-import { PublicCommandsService } from "./services/public-commands.service";
-import { PrivateCommandsService } from "./services/private-commands.service";
-import { ScheduleModule } from "@nestjs/schedule";
-import { MongoDbProvider } from "./providers/mongodb.provider";
-import { AccountsScanningService } from "./services/accounts-scanning.service";
-import { BotMessageSenderService } from "./services/bot-message-sender.service";
-import { AccountUpdatesHandlerService } from "./services/account-updates-handler.service";
-import { OpenAIProvider } from "./providers/openai.provider";
-import { AIMessageAnalyzerService } from "./services/ai-message-analyzer.service";
-import { AIResponseGeneratorService } from "./services/ai-response-generator.service";
-import { ResponseGenerationScene } from "./services/response-generation.scene";
-import { BotStageService } from "./services/bot-stage.service";
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { BotModule } from './bot/bot.module';
+import { AppController } from './app.controller';
 
 @Module({
     imports: [
-        ScheduleModule.forRoot()
+        ConfigModule.forRoot({ isGlobal: true }),
+        BotModule
     ],
-    providers: [
-        MongoDbProvider,
-        OpenAIProvider,
-        SessionStoreProvider,
-        SessionMiddlewareProvider,
-        BotService,
-        PublicCommandsService,
-        PrivateCommandsService,
-        AIMessageAnalyzerService,
-        AIResponseGeneratorService,
-        BotMessageSenderService,
-        AccountUpdatesHandlerService,
-        AccountsScanningService,
-        ResponseGenerationScene,
-        BotStageService
-    ]
+    controllers: [AppController],
 })
-export class AppModule {}
+export class AppModule { }
