@@ -4,27 +4,11 @@
   "description": "A bot project to search for specific messages using AI in user chats.",
   "main": "build/app.js",
   "scripts": {
-    "dev": "npm run clean && npm run build && npm run start",
-    "start": "node --env-file .env.local build/main",
-    "build": "tsc --build",
-    "clean": "tsc --build --clean"
-  },
-  "devDependencies": {
-    "@types/markdown-escape": "^1.1.3",
-    "@types/node": "^22.1.0",
-    "@typescript-eslint/eslint-plugin": "^5.33.0",
-    "@typescript-eslint/parser": "^5.33.0",
-    "eslint": "^8.21.0"
-  },
-  "eslintConfig": {
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-      "ecmaVersion": "latest",
-      "sourceType": "module"
-    },
-    "plugins": [
-      "@typescript-eslint"
-    ]
+    "build": "nest build",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:prod": "node dist/main"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.4",
@@ -35,7 +19,26 @@
     "mongodb": "^6.8.0",
     "openai": "^4.55.7",
     "telegraf": "github:telegraf/telegraf",
-    "telegram": "^2.23.10",
-    "typescript": "^5.5.4"
+    "telegram": "^2.23.10"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.0.0",
+    "@nestjs/schematics": "^10.0.0",
+    "@types/markdown-escape": "^1.1.3",
+    "@types/node": "^22.1.0",
+    "@typescript-eslint/eslint-plugin": "^5.33.0",
+    "@typescript-eslint/parser": "^5.33.0",
+    "eslint": "^8.21.0",
+    "typescript": "^5.6.2"
+  },
+  "eslintConfig": {
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "ecmaVersion": "latest",
+      "sourceType": "module"
+    },
+    "plugins": [
+      "@typescript-eslint"
+    ]
   }
 }
