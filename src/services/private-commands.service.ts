@@ -2,7 +2,7 @@ import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { BotService } from "./bot.service";
 import { Composer, SessionStore } from "telegraf";
 import { CustomContext, CustomSession } from "../types/custom-context.interfaces";
-import { SESSION_STORE } from "../providers/session-store.provider";
+import { SESSION_STORE } from "../bot/providers/session-store.provider";
 import authMiddleware from "../middlewares/auth.middleware";
 import { safeAction } from "../tools/telegram";
 

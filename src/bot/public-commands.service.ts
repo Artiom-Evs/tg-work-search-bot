@@ -1,11 +1,12 @@
 import { Command, Update } from "nestjs-telegraf";
 import { Context } from "telegraf";
+import { SceneContext } from "telegraf/typings/scenes";
 
 @Update()
 export class PublicCommandsService {
     @Command("start")
-    start(ctx: Context) {
-        ctx.reply("Hello! I am a bot!");
+    async start(ctx: SceneContext) {
+        await ctx.scene.enter("authorization");
     }
 
     @Command("help")

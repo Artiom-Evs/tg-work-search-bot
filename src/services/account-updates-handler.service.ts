@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { SESSION_STORE } from "../providers/session-store.provider";
+import { SESSION_STORE } from "../bot/providers/session-store.provider";
 import { ChatItem, CustomSession } from "../types/custom-context.interfaces";
 import { SessionStore } from "telegraf";
 import { getClient } from "../tools/telegram";

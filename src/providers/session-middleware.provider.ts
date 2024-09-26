@@ -1,5 +1,5 @@
 import { Provider } from "@nestjs/common";
-import { SESSION_STORE } from "./session-store.provider";
+import { SESSION_STORE } from "../bot/providers/session-store.provider";
 import { session, SessionStore } from "telegraf";
 import { CustomSession } from "../types/custom-context.interfaces";
 
