@@ -1,24 +1,20 @@
 import { Module } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { TelegrafModule } from "nestjs-telegraf";
-import { PublicCommandsService } from "./public-commands.service";
-import { Scenes, session, SessionStore } from "telegraf";
-import { AuthorizationScene } from "./authorization.scene";
+import { PublicCommandsService } from "./services/public-commands.service";
+import { PrivateCommandsService } from "./services/private-commands.service";
+import { AuthorizationScene } from "./scenes/authorization.scene";
+import { BotOptionsFactory } from "./services/bot-options.factory";
 
 @Module({
     imports: [
         TelegrafModule.forRootAsync({
-            inject: [ConfigService],
-            useFactory: (configService: ConfigService) => ({
-                token: configService.get("TELEGRAM_BOT_API_TOKEN"),
-                middlewares: [session()],
-            })
+            useClass: BotOptionsFactory
         })
     ],
     providers: [
-        PublicCommandsService,
         AuthorizationScene,
+        PublicCommandsService,
+        PrivateCommandsService,
     ]
 })
 export class BotModule { }
-
