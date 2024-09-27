@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { TelegramClientFactory } from "src/telegram-client/telegram-client.factory";
 import { Api, TelegramClient } from "telegram";
 import { StringSession } from "telegram/sessions";
+import { Dialog } from "telegram/tl/custom/dialog";
 
 @Injectable()
 export class TelegramClientService {
@@ -74,6 +75,25 @@ export class TelegramClientService {
         }
         catch (err) {
             this._logger.error("Error while sign-out user from Telegram.", err);
+            throw err;
+        }
+        finally {
+            await client.disconnect();
+            await client.destroy();
+        }
+    }
+
+    public async getUserChats(telegramSession: string): Promise<Dialog[]> {
+        let client: TelegramClient;
+
+        try {
+            client = await this._clientFactory.createTelegramClient(telegramSession);
+            const dialogs = await client.getDialogs({ archived: false }) ?? [];
+            const chats = dialogs.filter(chat => chat.isChannel || chat.isGroup);
+            return chats;
+        }
+        catch (err) {
+            this._logger.error("Error while getting user chats from Telegram.", err);
             throw err;
         }
         finally {

@@ -29,4 +29,9 @@ export class PrivateCommandsService {
             await ctx.reply("Error while sign-out from Telegram.");
         }
     }
+
+    @Command("chats")
+    async chats(ctx: CustomContext) {
+        await ctx.scene.enter("chats-selection");
+    }
 }

@@ -4,6 +4,7 @@ import { PublicCommandsService } from "./services/public-commands.service";
 import { PrivateCommandsService } from "./services/private-commands.service";
 import { AuthorizationScene } from "./scenes/authorization.scene";
 import { BotOptionsFactory } from "./services/bot-options.factory";
+import { ChatsSelectionScene } from "./scenes/chats-selection.scene";
 
 @Module({
     imports: [
@@ -13,6 +14,7 @@ import { BotOptionsFactory } from "./services/bot-options.factory";
     ],
     providers: [
         AuthorizationScene,
+        ChatsSelectionScene,
         PublicCommandsService,
         PrivateCommandsService,
     ]
