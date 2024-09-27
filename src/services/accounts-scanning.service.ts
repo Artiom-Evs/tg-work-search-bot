@@ -6,7 +6,7 @@ import config from "../app.config";
 import { ChatItem, UserSessionDocument } from "../types/custom-context.interfaces";
 import { AccountUpdatesHandlerService } from "./account-updates-handler.service";
 import { BotMessageSenderService } from "./bot-message-sender.service";
-import { AIMessageAnalyzerService } from "./ai-message-analyzer.service";
+import { AIMessageAnalyzerService } from "../ai/ai-message-analyzer.service";
 
 @Injectable()
 export class AccountsScanningService {

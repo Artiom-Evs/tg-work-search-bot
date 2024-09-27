@@ -1,11 +1,10 @@
+import { Injectable } from "@nestjs/common";
 import OpenAI from "openai";
-import { OPENAI_CLIENT } from "../providers/openai.provider";
-import { Inject, Injectable } from "@nestjs/common";
 import { JSONSchema } from "openai/lib/jsonschema";
 import { ChatCompletion, ResponseFormatJSONSchema } from "openai/resources";
 import { Api } from "telegram";
 import { DEFAULT_DEFINE_TARGET_MESSAGES_PROMPT, DEFINE_TARGET_MESSAGES_PROMPT_TEMPLATE, GPT_MAX_TOKENS, GPT_MODEL } from "./ai.constants";
-import { AnalyzeMessagesAIResponse, TargetMessageAIResponse } from "../types/ai.interfaces";
+import { AnalyzeMessagesAIResponse, TargetMessageAIResponse } from "./ai.interfaces";
 
 const dataSchema: JSONSchema = {
     type: "object",
@@ -37,7 +36,7 @@ const jsonSchema: ResponseFormatJSONSchema.JSONSchema = {
 @Injectable()
 export class AIMessageAnalyzerService {
     constructor(
-        @Inject(OPENAI_CLIENT) private readonly _openai: OpenAI
+        private readonly _openai: OpenAI
     ) { }
 
 

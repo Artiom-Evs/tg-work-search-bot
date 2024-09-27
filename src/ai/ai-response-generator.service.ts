@@ -1,5 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { OPENAI_CLIENT } from "../providers/openai.provider";
+import { Injectable } from "@nestjs/common";
 import OpenAI from "openai";
 import { Api } from "telegram";
 import { DEFAULT_GENERATE_RESPONSE_PROMPT, GENERATE_RESPONSE_PROMPT_TEMPLATE, GPT_MAX_TOKENS, GPT_MODEL } from "./ai.constants";
@@ -8,7 +7,7 @@ import { ChatCompletion } from "openai/resources";
 @Injectable()
 export class AIResponseGeneratorService {
     constructor(
-        @Inject(OPENAI_CLIENT) private readonly _openai: OpenAI
+        private readonly _openai: OpenAI
     ) { }
 
     public async generateResponse(message: Api.Message, customPrompt: string = DEFAULT_GENERATE_RESPONSE_PROMPT): Promise<string> {

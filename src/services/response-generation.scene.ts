@@ -1,9 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { Markup, Scenes } from "telegraf";
 import { CustomContext } from "../types/custom-context.interfaces";
-import { AIResponseGeneratorService } from "./ai-response-generator.service";
+import { AIResponseGeneratorService } from "../ai/ai-response-generator.service";
 import { safeAction } from "../tools/telegram";
-import { DEFAULT_GENERATE_RESPONSE_PROMPT, PromptNames } from "./ai.constants";
+import { DEFAULT_GENERATE_RESPONSE_PROMPT, PromptNames } from "../ai/ai.constants";
 
 @Injectable()
 export class ResponseGenerationScene extends Scenes.WizardScene<CustomContext> {
