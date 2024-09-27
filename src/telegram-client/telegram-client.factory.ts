@@ -8,7 +8,7 @@ export class TelegramClientFactory {
     constructor(private readonly _configService: ConfigService) { }
 
     async createTelegramClient(sessionStr: string): Promise<TelegramClient> {
-        const apiId = this._configService.get<number>('TELEGRAM_API_ID');
+        const apiId = parseInt(this._configService.get<string>('TELEGRAM_API_ID'));
         const apiHash = this._configService.get<string>('TELEGRAM_API_HASH');
 
         const client = new TelegramClient(new StringSession(sessionStr), apiId, apiHash, { connectionRetries: 5 });
