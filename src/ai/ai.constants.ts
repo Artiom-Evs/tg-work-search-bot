@@ -53,3 +53,8 @@ The message should arouse interest and a desire to get in touch with our company
 The message is intended for a chat or group in one of the instant messengers, so the message should be relatively short.
 do not add explanatory text to your answer.
 `;
+
+export const DefaultPrompts: Record<PromptNames, string> = {
+    [PromptNames.DefineTargetMessages]: DEFAULT_DEFINE_TARGET_MESSAGES_PROMPT,
+    [PromptNames.GenerateResponse]: DEFAULT_GENERATE_RESPONSE_PROMPT ,
+}

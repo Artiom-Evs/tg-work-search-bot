@@ -34,4 +34,9 @@ export class PrivateCommandsService {
     async chats(ctx: CustomContext) {
         await ctx.scene.enter("chats-selection");
     }
+
+    @Command("prompts")
+    async prompts(ctx: CustomContext) {
+        await ctx.scene.enter("prompts-management");
+    }
 }

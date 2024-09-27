@@ -5,6 +5,7 @@ import { PrivateCommandsService } from "./services/private-commands.service";
 import { AuthorizationScene } from "./scenes/authorization.scene";
 import { BotOptionsFactory } from "./services/bot-options.factory";
 import { ChatsSelectionScene } from "./scenes/chats-selection.scene";
+import { PromptsManagementScene } from "./scenes/prompts-management.scene";
 
 @Module({
     imports: [
@@ -15,6 +16,7 @@ import { ChatsSelectionScene } from "./scenes/chats-selection.scene";
     providers: [
         AuthorizationScene,
         ChatsSelectionScene,
+        PromptsManagementScene,
         PublicCommandsService,
         PrivateCommandsService,
     ]
