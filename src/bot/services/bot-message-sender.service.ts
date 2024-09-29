@@ -1,13 +1,13 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { BotService } from "./bot.service";
-import { TargetChatUpdateInfo } from "../types/chat-update-info.interfaces";
-import { Markup } from "telegraf";
+import { Injectable } from "@nestjs/common";
+import { InjectBot } from "nestjs-telegraf";
+import { Telegraf, Markup } from "telegraf";
+import { TargetChatUpdateInfo } from "../interfaces/chat-update-info.interfaces";
 import markdownEscape = require("markdown-escape");
 
 @Injectable()
 export class BotMessageSenderService {
     constructor(
-        @Inject(BotService) private readonly _bot: BotService
+        @InjectBot() private readonly _bot: Telegraf
     ) { }
 
     async sendTargetMessageNotification(update: TargetChatUpdateInfo): Promise<void> {
@@ -43,5 +43,4 @@ export class BotMessageSenderService {
 Summary: ${summaryText}
         `;
     }
-
 }

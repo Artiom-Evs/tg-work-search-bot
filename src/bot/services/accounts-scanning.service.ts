@@ -1,26 +1,30 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { Db } from "mongodb";
-import { MONGODB_CONNECTION } from "../providers/mongodb.provider";
 import { Interval } from "@nestjs/schedule";
-import config from "../app.config";
-import { ChatItem, UserSessionDocument } from "../types/custom-context.interfaces";
+import { ChatItem } from "../interfaces/custom-context.interface";
+import { UserSessionDocument } from "../interfaces/user-session-document.interface";
 import { AccountUpdatesHandlerService } from "./account-updates-handler.service";
 import { BotMessageSenderService } from "./bot-message-sender.service";
-import { AIMessageAnalyzerService } from "../ai/ai-message-analyzer.service";
+import { AIMessageAnalyzerService } from "src/ai/ai-message-analyzer.service";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class AccountsScanningService {
     private readonly _logger = new Logger(AccountsScanningService.name);
+    private readonly _rescanIntervalMs: number;
     private _isScanning = false;
 
     constructor(
-        @Inject(MONGODB_CONNECTION) private readonly _db: Db,
-        @Inject(AccountUpdatesHandlerService) private readonly _updatesHandler: AccountUpdatesHandlerService,
-        @Inject(BotMessageSenderService) private readonly _messageSender: BotMessageSenderService,
-        @Inject(AIMessageAnalyzerService) private readonly _messageAnalyzer: AIMessageAnalyzerService
-    ) { }
+        private readonly _db: Db,
+        private readonly _configService: ConfigService,
+        private readonly _updatesHandler: AccountUpdatesHandlerService,
+        private readonly _messageSender: BotMessageSenderService,
+        private readonly _messageAnalyzer: AIMessageAnalyzerService
+    ) {
+        this._rescanIntervalMs = parseInt(this._configService.get<string>("ACCOUNTS_RESCAN_PERIOD_MS") ?? "60000");
+    }
 
-    @Interval(config.accountsRescanPeriodMs)
+    @Interval(30000)
     async rescanAccounts() {
         try {
             if (this._isScanning) {
@@ -63,7 +67,7 @@ export class AccountsScanningService {
                         if (!message)
                             continue;
 
-                        await this._messageSender.sendTargetMessageNotification({
+                        await this  ._messageSender.sendTargetMessageNotification({
                             userId,
                             chat,
                             message,
@@ -81,6 +85,3 @@ export class AccountsScanningService {
         }
     }
 }
-
-
-

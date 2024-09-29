@@ -1,13 +1,13 @@
 import { Provider } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { MongoClient, Db } from "mongodb";
-import config from "../app.config";
-
-export const MONGODB_CONNECTION = "MONGODB_CONNECTION";
 
 export const MongoDbProvider: Provider<Db> = {
-    provide: MONGODB_CONNECTION,
-    useFactory: async () => {
-        const client = new MongoClient(config.mongoDbUrl);
+    provide: Db,
+    inject: [ConfigService],
+    useFactory: async (configService: ConfigService) => {
+        const url = configService.get<string>("MONGODB_URL");
+        const client = new MongoClient(url);
 
         await client.connect()
             .then(() => console.log("Successfully connected to MongoDB."))
