@@ -14,6 +14,7 @@ import { AIModule } from "src/ai/ai.module";
 import { SessionStoreProvider } from "./providers/session-store.provider";
 import { TelegramClientModule } from "src/telegram-client/telegram-client.module";
 import { ScheduleModule } from "@nestjs/schedule";
+import { ResponseGenerationScene } from "./scenes/response-generation.scene";
 
 @Module({
     imports: [
@@ -30,6 +31,7 @@ import { ScheduleModule } from "@nestjs/schedule";
         AuthorizationScene,
         ChatsSelectionScene,
         PromptsManagementScene,
+        ResponseGenerationScene,
         PublicCommandsService,
         PrivateCommandsService,
         BotMessageSenderService,

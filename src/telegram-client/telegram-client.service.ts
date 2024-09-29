@@ -101,4 +101,46 @@ export class TelegramClientService {
             await client.destroy();
         }
     }
+
+    public async getChatMessage(telegramSession: string, chatId: number, messageId: number): Promise<Api.Message | null> {
+        let client: TelegramClient;
+
+        try {
+            client = await this._clientFactory.createTelegramClient(telegramSession);
+
+            // TODO: entities preloading should be implemented in the future
+            await client.getDialogs();
+            const messages = await client.getMessages(`${chatId}`, { ids: messageId });
+            return messages[0] ?? null;
+        }
+        catch (err) {
+            this._logger.error("Error while getting chat message from Telegram.", err);
+            throw err;
+        }
+        finally {
+            await client.disconnect();
+            await client.destroy();
+        }
+    }
+
+    public async sendMessage(telegramSession: string, chatId: number, message: string, replyTo?: number): Promise<Api.Message> {
+        let client: TelegramClient;
+
+        try {
+            client = await this._clientFactory.createTelegramClient(telegramSession);
+            // TODO: entities preloading should be implemented in the future
+            await client.getDialogs();
+
+            const sendedMessage = await client.sendMessage(chatId, { message, replyTo });
+            return sendedMessage;
+        }
+        catch (err) {
+            this._logger.error("Error while sending message to Telegram.", err);
+            throw err;
+        }
+        finally {
+            await client.disconnect();
+            await client.destroy();
+        }
+    }
 }   

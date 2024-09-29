@@ -1,56 +1,26 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { Markup, Scenes } from "telegraf";
-import { CustomContext } from "../types/custom-context.interfaces";
-import { AIResponseGeneratorService } from "../ai/ai-response-generator.service";
-import { safeAction } from "../tools/telegram";
-import { DEFAULT_GENERATE_RESPONSE_PROMPT, PromptNames } from "../ai/ai.constants";
+import { Markup } from "telegraf";
+import { CustomContext } from "../interfaces/custom-context.interface";
+import { AIResponseGeneratorService } from "../../ai/ai-response-generator.service";
+import { DEFAULT_GENERATE_RESPONSE_PROMPT, PromptNames } from "../../ai/ai.constants";
+import { Action, Wizard, SceneEnter, WizardStep } from "nestjs-telegraf";
+import { TelegramClientService } from "src/telegram-client/telegram-client.service";
 
-@Injectable()
-export class ResponseGenerationScene extends Scenes.WizardScene<CustomContext> {
+@Wizard("response-generation")
+export class ResponseGenerationScene {
     constructor(
-        @Inject(AIResponseGeneratorService) private readonly _responseGenerator: AIResponseGeneratorService
-    ) {
-        super("response-generation", 
-            (ctx) => this.step1Handler(ctx),
-            (ctx) => this.step2Handler(ctx)
-        );
+        private readonly _responseGenerator: AIResponseGeneratorService,
+        private readonly _clientService: TelegramClientService
+    ) { }
 
-        this.action("send_response", async (ctx) => {
-            const chatId = "chatId" in ctx.scene.state ? ctx.scene.state.chatId as number : null;
-            const messageId = "messageId" in ctx.scene.state ? ctx.scene.state.messageId as number : null;
-
-            this.handleSendResponse(ctx, chatId, messageId);
-        });
-
-        this.action("regenerate_response", async (ctx) => {
-            this.handleRegenerateResponse(ctx);
-        });
-
-        this.action("regenerate_response_with_comment", async (ctx) => {
-            this.handleRegenerateResponseWithComment(ctx);
-        });
-
-        this.action("cancel", async (ctx) => {
-            this.handleCancel(ctx);
-        });
-    }
-
-    async step1Handler(ctx: CustomContext) {
+    @SceneEnter()
+    async enter(ctx: CustomContext) {
         const chatId = "chatId" in ctx.scene.state ? ctx.scene.state.chatId as number : null;
         const messageId = "messageId" in ctx.scene.state ? ctx.scene.state.messageId as number : null;
 
         if (!chatId || !messageId)
             return await ctx.reply("Chat ID and message ID are required to generate a response.");
 
-        const message = await safeAction(ctx.session.auth.session, async (client) => {
-            // TODO: entities preloading should be implemented in the future
-            await client.getDialogs();
-            const messages = await client.getMessages(`${chatId}`, { ids: messageId });
-            return messages[0] ?? null;
-        }, (err) => {
-            ctx.reply(`Error while getting original message. Error: ${err.message}.`);
-        });
-
+        const message = await this._clientService.getChatMessage(ctx.session.auth.telegramSession ?? "", chatId, messageId);
         if (!message)
             return await ctx.reply("Original message not found.");
 
@@ -67,7 +37,16 @@ export class ResponseGenerationScene extends Scenes.WizardScene<CustomContext> {
         await ctx.reply(`Generated response:\n\n${ctx.scene.session.response_text}`, keyboard);
     }
 
-    async step2Handler(ctx: CustomContext) {
+    // uses as a terminator for user messages
+    @WizardStep(1)
+    step1() {
+        console.log("Step 1");
+    }
+
+    @WizardStep(2)
+    async step2(ctx: CustomContext) {
+        console.log("Step 2");
+
         const chatId = "chatId" in ctx.scene.state ? ctx.scene.state.chatId as number : null;
         const messageId = "messageId" in ctx.scene.state ? ctx.scene.state.messageId as number : null;
         const commentText = ctx.text?.trim();
@@ -78,14 +57,7 @@ export class ResponseGenerationScene extends Scenes.WizardScene<CustomContext> {
         if (!chatId || !messageId)
             return await ctx.reply("Chat ID and message ID are required to generate a response.");
 
-        const message = await safeAction(ctx.session.auth.session, async (client) => {
-            // TODO: entities preloading should be implemented in the future
-            await client.getDialogs();
-            const messages = await client.getMessages(`${chatId}`, { ids: messageId });
-            return messages[0] ?? null;
-        }, (err) => {
-            ctx.reply(`Error while getting original message. Error: ${err.message}.`);
-        });
+        const message = await this._clientService.getChatMessage(ctx.session.auth.telegramSession ?? "", chatId, messageId);
 
         if (!message)
             return await ctx.reply("Original message not found.");
@@ -107,21 +79,17 @@ export class ResponseGenerationScene extends Scenes.WizardScene<CustomContext> {
         await ctx.reply(`Generated response:\n\n${ctx.scene.session.response_text}`, keyboard);
     }
 
-    async handleSendResponse(ctx: CustomContext, chatId: number | null, messageId: number | null): Promise<void> {
+    @Action("send_response")
+    private async sendResponse(ctx: CustomContext) {
+        const chatId = "chatId" in ctx.scene.state ? ctx.scene.state.chatId as number : null;
+        const messageId = "messageId" in ctx.scene.state ? ctx.scene.state.messageId as number : null;
+
         if (!chatId || !messageId) {
             await ctx.reply("Chat ID and message ID are required to generate a response.");
             return;
         }
 
-        const message = await safeAction(ctx.session.auth.session, async (client) => {
-            await client.getDialogs();
-            return await client.sendMessage(chatId, {
-                message: ctx.scene.session.response_text,
-                replyTo: messageId
-            });
-        }, (err) => {
-            ctx.reply(`Error while getting original message. Error: ${err.message}.`);
-        });
+        const message = await this._clientService.sendMessage(ctx.session.auth.telegramSession ?? "", chatId, ctx.scene.session.response_text, messageId);
 
         if (!message) {
             await ctx.reply("Error while sending response.");
@@ -133,25 +101,27 @@ export class ResponseGenerationScene extends Scenes.WizardScene<CustomContext> {
         await ctx.scene.leave();
     }
 
-    async handleRegenerateResponse(ctx: CustomContext): Promise<void> {
-        ctx.wizard.selectStep(0);
+    @Action("regenerate_response")
+    private async regenerateResponse(ctx: CustomContext) {
         await ctx.deleteMessage();
-        await this.step1Handler(ctx);
+        await ctx.scene.reenter();
     }
 
-    async handleRegenerateResponseWithComment(ctx: CustomContext): Promise<void> {
-        ctx.wizard.selectStep(1);
+    @Action("regenerate_response_with_comment")
+    async regenerateResponseWithComment(ctx: CustomContext) {
         await ctx.deleteMessage();
-
+        await ctx.wizard.next();
 
         const keyboard = Markup.inlineKeyboard([
             Markup.button.callback("Cancel", "cancel")
         ]);
+        
         const msg = await ctx.sendMessage("Please enter your comment to correct response generation:", keyboard);
         (ctx.scene.session.tempMessageIds ??= []).push(msg.message_id);
     }
 
-    async handleCancel(ctx: CustomContext): Promise<void> {
+    @Action("cancel")
+    async cancel(ctx: CustomContext) {
         await ctx.deleteMessage();
         await ctx.scene.leave();
     }
