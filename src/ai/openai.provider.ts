@@ -1,6 +1,5 @@
 import { Provider } from "@nestjs/common";
 import OpenAI from "openai";
-import config from "../app.config";
 import { ConfigService } from "@nestjs/config";
 
 export const OpenAIProvider: Provider = {
