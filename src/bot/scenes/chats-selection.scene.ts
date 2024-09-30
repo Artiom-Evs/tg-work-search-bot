@@ -1,9 +1,8 @@
-import { Action, Scene, SceneEnter, SceneLeave } from "nestjs-telegraf";
+import { Action, Scene, SceneEnter } from "nestjs-telegraf";
 import { TelegramClientService } from "src/telegram-client/telegram-client.service";
 import { CustomContext, SelectionChatItem } from "../interfaces/custom-context.interface";
 import { Markup, NarrowedContext } from "telegraf";
 import { CallbackQuery, Update } from "telegraf/typings/core/types/typegram";
-import { isNumberObject } from "util/types";
 
 const PER_PAGE = 25;
 

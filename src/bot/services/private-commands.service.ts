@@ -4,11 +4,14 @@ import { SceneContext } from "telegraf/typings/scenes";
 import { CustomContext, CustomSession } from "../interfaces/custom-context.interface";
 import { TelegramClientService } from "src/telegram-client/telegram-client.service";
 import { CallbackQuery, Update as TFUpdate } from "telegraf/typings/core/types/typegram";
+import { Db, ObjectId } from "mongodb";
+import { GeneratedResponseDocument } from "../interfaces/generated-response-document.interface";
 
 @Update()
 export class PrivateCommandsService {
     constructor(
-        private readonly _clientService: TelegramClientService
+        private readonly _clientService: TelegramClientService,
+        private readonly _db: Db,
     ) { }
 
     @Use()
@@ -56,4 +59,26 @@ export class PrivateCommandsService {
             else
             await ctx.answerCbQuery("Invalid callback data!");
     }
+
+
+    @Action(/send_preview_generated_response_(.+)/)
+    async sendPreviewGeneratedResponse(ctx: NarrowedContext<CustomContext, TFUpdate.CallbackQueryUpdate<CallbackQuery & { data: string; }>>) {
+        if (!ctx.session.auth?.isAuthorized) {
+            await ctx.answerCbQuery("You should be authorized!");
+            return;
+        }
+
+        const responsesCollection = this._db.collection<GeneratedResponseDocument>("generated-responses");
+        const responseId = ctx.callbackQuery.data.match(/send_preview_generated_response_(.+)/)?.[1];
+        const generatedResponse = await responsesCollection.findOne({ _id: new ObjectId(responseId) });
+
+        if (!generatedResponse) {
+            await ctx.answerCbQuery("Response data not found!");
+            return;
+        }
+
+        await this._clientService.sendMessage(ctx.session.auth.telegramSession, generatedResponse.chatId, generatedResponse.text, generatedResponse.messageId);
+        await ctx.answerCbQuery("Message successfully  sent!");
+    }
+
 }
