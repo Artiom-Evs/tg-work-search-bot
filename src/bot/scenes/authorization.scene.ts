@@ -4,6 +4,8 @@ import { WizardContext } from "telegraf/scenes";
 import { CustomContext } from "../interfaces/custom-context.interface";
 import { Logger } from "@nestjs/common";
 import { TelegramClientService } from "src/telegram-client/telegram-client.service";
+import { Api } from "telegram";
+import { Message } from "telegraf/typings/core/types/typegram";
 
 @Wizard("authorization")
 export class AuthorizationScene {
@@ -14,16 +16,22 @@ export class AuthorizationScene {
     ) { }
 
     @SceneEnter()
-    async enter(ctx: WizardContext) {
-        await ctx.reply("Welcome! Please, enter your phone number:");
+    async enter(ctx: CustomContext) {
+        const message = await ctx.reply("Welcome! Please, enter your phone number:", Markup.inlineKeyboard([
+            Markup.button.callback("Cancel", "cancel")
+        ]));
+        this.addToTempMessages(ctx, message);
     }
 
     @WizardStep(1)
     async handlePhoneNumberInput(ctx: CustomContext) {
         const phone = ctx.text;
+        
+        this.addToTempMessages(ctx);
 
         if (phone && !phone.match(/^\+[\d\s]+$/)) {
-            await ctx.reply("Invalid phone number format.");
+            const message = await ctx.reply("Invalid phone number format.");
+            this.addToTempMessages(ctx, message);
             return;
         }
 
@@ -33,12 +41,18 @@ export class AuthorizationScene {
             const sessionStr = await this._clientService.sendAuthorizationCode(phone);
             ctx.scene.session.telegramSession = sessionStr;
 
-            await ctx.reply(`Enter secret code separated by space (for example: "12 345"):`);
+            const message = await ctx.reply(`Enter secret code separated by space (for example: "12 345"):`, Markup.inlineKeyboard([
+                Markup.button.callback("Cancel", "cancel")
+            ]));
+            this.addToTempMessages(ctx, message);
+
             await ctx.wizard.next();
         }
         catch (e: any) {
             this._logger.error("Error while sending authorization code.", e);
-            await ctx.reply("Error while sending authorization code. Try again!");
+            const message = await ctx.reply("Error while sending authorization code. Try again!");
+            this.addToTempMessages(ctx, message);
+            
             await ctx.scene.reenter();
         }
     }
@@ -46,15 +60,20 @@ export class AuthorizationScene {
     @WizardStep(2)
     async handleSecretCodeInput(ctx: CustomContext) {
         const secretCode = ctx.text.replace(" ", "");
+        
+        this.addToTempMessages(ctx);
 
         if (secretCode && !secretCode.match(/[ 0-9]/)) {
-            await ctx.reply("Invalid code format.");
+            const message = await ctx.reply("Invalid code format.");
+            this.addToTempMessages(ctx, message);
             return;
         }
 
         ctx.scene.session.secretCode = secretCode;
 
-        await ctx.reply(`Enter your password (if you don't use it, enter "-"):`);
+        const message = await ctx.reply(`Enter your password (if you don't use it, enter "-"):`);
+        this.addToTempMessages(ctx, message);
+
         await ctx.wizard.next();
     }
 
@@ -63,6 +82,8 @@ export class AuthorizationScene {
     async handlePasswordInput(ctx: CustomContext) {
         // user sends "-" when he doesn't use password
         const password = ctx.text === "-" ? "" : ctx.text;
+
+        this.addToTempMessages(ctx);
 
         try {
             const sessionStr = await this._clientService.signinUser(
@@ -82,8 +103,29 @@ export class AuthorizationScene {
         }
         catch (err) {
             this._logger.error("Error while completing user authorization.", err);
-            await ctx.reply("Error while login into Telegram. Try again!");
+            const message = await ctx.reply("Error while login into Telegram. Try again!");
+            this.addToTempMessages(ctx, message);
+
             await ctx.scene.reenter();
         }
+    }
+
+    @Action("cancel")
+    async cancel(ctx: CustomContext) {
+        return ctx.scene.leave();
+    }
+
+    @SceneLeave()
+    async leave(ctx: CustomContext) {
+        console.debug("IDS:", ctx.scene.session.tempMessageIds);
+        if (ctx.scene.session.tempMessageIds?.length > 0)
+            await ctx.deleteMessages(ctx.scene.session.tempMessageIds);
+    }
+
+    private addToTempMessages(ctx: CustomContext, message?: Message.TextMessage) {
+        if (message)
+            (ctx.scene.session.tempMessageIds ??= []).push(message.message_id);
+        else
+            (ctx.scene.session.tempMessageIds ??= []).push(ctx.message.message_id);
     }
 }
