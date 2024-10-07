@@ -46,17 +46,25 @@ export class PrivateCommandsService {
 
     @Action("delete_notification")
     async deleteNotification(ctx: CustomContext) {
-        await ctx.deleteMessage();
+        try {
+            await ctx.deleteMessage();
+        }
+        catch (e: any) {
+            if (e.message.includes("message can't be deleted for everyone"))
+                await ctx.answerCbQuery("Message too old to delete.");
+            else
+                await ctx.answerCbQuery("Ops! Some error occured while message deletion.");
+        }
     }
 
     @Action(/generate_response_(.+)-(.+)/)
     async generateResponse(ctx: NarrowedContext<CustomContext, TFUpdate.CallbackQueryUpdate<CallbackQuery & { data: string; }>>) {
         const chatId = Number(ctx.callbackQuery.data.match(/generate_response_(.+)-(.+)/)?.[1]);
-            const messageId = Number(ctx.callbackQuery.data.match(/generate_response_(.+)-(.+)/)?.[2]);
-            
-            if (chatId && messageId)
-                await ctx.scene.enter("response-generation", { chatId, messageId });
-            else
+        const messageId = Number(ctx.callbackQuery.data.match(/generate_response_(.+)-(.+)/)?.[2]);
+
+        if (chatId && messageId)
+            await ctx.scene.enter("response-generation", { chatId, messageId });
+        else
             await ctx.answerCbQuery("Invalid callback data!");
     }
 
