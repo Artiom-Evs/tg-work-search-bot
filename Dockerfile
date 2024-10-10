@@ -11,4 +11,4 @@ COPY . .
 RUN npm install
 RUN npm run build
 
-CMD ["node", "build/main"]
+CMD ["node", "dist/main"]
