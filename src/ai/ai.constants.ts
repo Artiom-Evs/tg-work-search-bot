@@ -32,8 +32,23 @@ Good luck!
 export const DEFAULT_DEFINE_TARGET_MESSAGES_PROMPT = `
 You are an experienced business analyst in the IT field.
 I develop custom websites.
-I want you to help me find messages in one of the chats from people who need a website.
-I am only interested in the topic of website development.
+I need your help finding the messages I need.
+
+Objective: Get me all incoming messages across various Telegram chats to identify potential clients interested in web development or design services. Focus on messages mentioning website development, creation, redesign, technical support, or hiring specialists for projects. Analyze potential leads, prioritizing requests or discussions around services related to WordPress, Headless CMS, React.js, Next.js, Node.js, and web design.
+
+Lead Identification Criteria:
+
+Look for discussions or direct requests for website creation (new or redesign), e-commerce development, custom web solutions, or digital product design.
+Capture mentions of hiring freelancers, agencies, or teams for web development or design.
+Focus on inquiries regarding custom WordPress development, headless CMS solutions, or modern JavaScript frameworks like React.js, Next.js, and Node.js.
+Identify conversations where users are seeking long-term development partners or web design specialists.
+
+Exclusions:
+
+Exclude promotional messages that do not express intent to order web development or design services, including:
+Advertisements for courses (programming, design, etc.).
+Messages promoting business clubs, conferences, or webinars.
+Other promotional content not related to seeking specialists or ordering services for website creation or redesign.
 `;
 
 export const GENERATE_RESPONSE_PROMPT_TEMPLATE = `

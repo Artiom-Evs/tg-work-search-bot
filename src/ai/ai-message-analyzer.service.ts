@@ -71,7 +71,7 @@ export class AIMessageAnalyzerService {
             ]
         })
             .catch(err => {
-                console.log("Error while getting response from OpenAI API.");
+                console.error("Error while getting response from OpenAI API.", err) ;
                 throw err;
             });
     }
